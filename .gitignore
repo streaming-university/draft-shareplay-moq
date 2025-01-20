@@ -21,3 +21,5 @@ draft-begen-moq-track-switching.xml
 package-lock.json
 report.xml
 !requirements.txt
+
+test.md
