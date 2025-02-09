@@ -108,11 +108,27 @@ Follower Client:
 Video-on-Demand (VoD) Session:  
 : A MoQ-based session where pre-recorded media is streamed with user-controlled playback features.
 
+## Notational Conventions
+
+This document uses the conventions detailed in ({{?RFC9000, Section 1.3}})
+when describing the binary encoding.
+
+As a quick reference, the following list provides a non normative summary
+of the parts of RFC9000 field syntax that are used in this specification.
+
+x (..):
+
+: Indicates that x can be any length including zero bits long.  Values
+ in this format always end on a byte boundary.
+
+x (i):
+
+: Indicates that x holds an integer value using the variable-length
+  encoding as described in ({{?RFC9000, Section 16}})
 
 # Synchronized Playback Control
 
 Until of the latest Media over QUIC Transport draft (draft-ietf-moq-transport-07), MOQT primarily supported a push-based content delivery architecture. The protocol does not explicitly define dedicated control messages for play, pause, or seek operations. Instead, these functionalities are achieved through subscription-based messaging.
-
 
 ## Playback Control Mechanisms
 
@@ -123,26 +139,70 @@ Seeking to a specific position within a track is supported using the Seek messag
 This document introduces new Sync-track messages, which can only be sent by the Leader client. When the Leader client sends these messages, a compatible publisher will respond by playing, pausing, or seeking as instructed. Upon receiving a "pause" command, the publisher halts broadcasting at the specified group id, freezing playback until a "play" command resumes it from the paused position. A "seek" command directs the publisher to calculate the frame corresponding to the provided group id and restart broadcasting from that frame. This mechanism ensures all subscribers (or clients) remain synchronized, allowing them to watch the stream simultaneously from the adjusted playback point.
 
 ## Sync-Track Messages
-Play:
 
-: PLAY Message {}
+Every single message on the Sync-Track is a MoQT object, which is transmitted using the MoQT streaming architecture. These messages encapsulate playback control commands (PLAY, PAUSE, SEEK) within MoQT objects, ensuring they are processed and relayed consistently across the session. The Sync-Track operates as a track within the MoQT session, where control messages are formatted as follows:
 
-Pause:
+~~~
+Sync-Track Message {
+  Message Type (i),
+  Message Length (i),
+  Message Payload (..),
+}
+~~~
+{: #shareplay-moq-message-format title="Overall Sync-Track Message Format"}
 
-: PAUSE Message {
-  GroupId }
+Each message type (PLAY, PAUSE, SEEK) is identified by its unique Message Type ID and follows a structured format to ensure integration with MoQT transport mechanisms. These messages are reliably delivered and processed in sequence, maintaining synchronization among all session participants. Since Sync-Track messages are standard MoQT objects, they leverage existing MoQT stream handling mechanisms.
 
-Seek:
 
-: SEEK Message {
-  GroupId } 
+|-------|-----------------------------------------------------|
+| ID    | Messages                                            |
+|------:|:----------------------------------------------------|
+| 0x1   | PLAY ({{message-play}})                             |
+|-------|-----------------------------------------------------|
+| 0x2   | PAUSE ({{message-pause}})                           |
+|-------|-----------------------------------------------------|
+| 0x3   | SEEK ({{message-seek}})                             |
+|-------|-----------------------------------------------------|
+
+### PLAY {#message-play}
+~~~
+PLAY Message {
+  Type (i) = 0x1,
+  Length (i),
+  Timestamp (..),
+}
+~~~
+{: #shareplay-moq-play-format title="Sync-Track PLAY Message"}
+
+### PAUSE {#message-pause}
+~~~
+PAUSE Message {
+  Type (i) = 0x2,
+  Length (i),
+  GroupId (i),
+  Timestamp (..),
+}
+~~~
+{: #shareplay-moq-pause-format title="Sync-Track PAUSE Message"}
+
+### SEEK {#message-seek}
+
+~~~
+SEEK Message {
+  Type (i) = 0x3,
+  Length (i),
+  GroupId (i),
+  Timestamp (..),
+}
+~~~
+{: #shareplay-moq-seek-format title="Sync-Track SEEK Message"}
 
 ## Playback Message Flow
 
-The following message flow illustrates how playback operations (PLAY, SEEK, and PAUSE) are used through the relay server, thus enabling clients to stay in a synchronized playback.
+The following message flow illustrates how playback operations (PLAY, SEEK, and PAUSE) are used through the relay servers, thus enabling clients to stay in a synchronized playback.
 
 ~~~ 
-Leader Client              Relay Server                Publisher   Follower Clients  
+Leader Client             Relay Server(s)               Publisher   Follower Clients  
      |                          |                          |               |
      |---------- PLAY --------->|                          |               |  
      |                          |---------- PLAY --------->|               |  
@@ -158,13 +218,13 @@ Leader Client              Relay Server                Publisher   Follower Clie
      |---- PAUSE {Group 18} --->|                          |               |  
      |                          |---- PAUSE {Group 18} --->|               |  
      |                          |<--- Stop Media At G18 ---|               |  
-     |                          |                          |               |  
+     |                          |                          |               |
 ~~~
+{: #shareplay-moq-message-flow-example title="Sync-Track Message Flow and Playback Example Scenario"}
 
 ### Message Semantics
 These messages MUST be sent exclusively by the Leader Client (Client ID 0).
 Relay servers MUST discard such messages if received from non-Leader clients.
-
 
 # Leader-Follower Client Model
 
@@ -172,7 +232,7 @@ The Leader-Follower Client Model is a subscriber coordination mechanism designed
 
 ## Role Assignment
 
-: The first subscriber to join a session is designated as the Leader Client (Client ID 0). Subsequent subscribers are assigned incremental Follower Client IDs (e.g., 1, 2, ...) and inherit playback state from the Leader.
+For simplicity, no leader election algorithm is implemented in this model. The first subscriber to join a session is automatically designated as the Leader Client (Client ID 0). Subsequent subscribers are assigned incremental Follower Client IDs (e.g., 1, 2, ...) and inherit playback state from the Leader. This ensures straightforward session initiation without requiring complex coordination mechanisms.
 
 ## Playback Control
 
@@ -183,22 +243,33 @@ Exclusive Control:
 
 State Propagation:
 
-: Control messages from the Leader Client are distributed to all Follower Clients via the relay server, ensuring synchronized execution.
+: Control messages from the Leader Client are distributed to all Follower Clients via the relay servers, ensuring synchronized execution.
 
 Leader Failure Handling:
 
 : If the Leader Client disconnects or becomes unresponsive, the lowest-ID active Follower Client assumes the Leader role. The new Leader Client inherits Client ID 0, but subsequent Follower IDs do not change.
 
+# Security Considerations {#security}
 
-# Video-on-Demand Architecture over MoQ
+TODO: Expand this section.
 
-This section defines an architecture for adapting Media over QUIC (MoQ) to Video-on-Demand (VoD) use cases. The model enables efficient retrieval and streaming of archived fragmented MP4 (fMP4) content through a specialized publisher (`moq-pub`), while maintaining compatibility with live-edge workflows.  
+# IANA Considerations {#iana}
 
-## Media Preparation Requirements  
+TODO: Expand this section.
+
+--- back
+
+# Example Publisher Model
+
+This section defines an example architecture for adapting Media over QUIC (MoQ) to Video-on-Demand (VoD) use cases. The model enables efficient retrieval and streaming of archived fragmented MP4 (fMP4) content through a specialized publisher (`moq-pub`), while maintaining compatibility with live-edge workflows.  
+
+## Media Preparation  
 Encoding:
-: Media MUST be encoded in H.264 (AVC) format.  
+: Media is encoded in H.264 (AVC) format.  
+
 Containerization:
-: Media MUST be packaged in fragmented MP4 (fMP4) format, where content is divided into discrete "moof" (Movie Fragment) and "mdat" (Media Data) atom pairs.  
+: Media is packaged in fragmented MP4 (fMP4) format, where content is divided into discrete "moof" (Movie Fragment) and "mdat" (Media Data) atom pairs.  
+
 Initialization Segments:
 : The `ftyp` (File Type) and `moov` (Movie Metadata) atoms MUST be prepended to the media file. These provide global metadata (e.g., codec information, track layouts) and are transmitted once per session.  
 
@@ -229,19 +300,10 @@ At the start of a streaming session:
 ## Dynamic Playback Control  
 The publisher asynchronously monitors a dedicated `sync-track` for control messages (e.g., `PLAY`, `PAUSE`, `SEEK`) issued by the *Leader Client*.  
 
-### Command Processing  
+### Command Processing
 Seek Operations: On receiving a `SEEK { groupdId }` command:  
-:   1. The publisher identifies the start of the nearest GOP boundary for the requested `groupdId`, and resumes publishing from the corresponding frame. 
+: 1. The publisher identifies the start of the nearest GOP boundary for the requested `groupdId`, and resumes publishing from the corresponding frame. 
   2. Streaming resumes from the start of the GOP containing the target I-frame, ensuring all dependent P/B-frames are included for seamless decoding.  
   3. Subscribers receive the full GOP sequence, eliminating decoder errors caused by missing reference frames.  
 Pause/Resume:
 : A `PAUSE` command halts the transmission according to the groupdId specified in the pause message, where groupdId corresponds to current group of the playback. A subsequent `PLAY` command resumes streaming from the next sequential object. 
-
-
-# Security Considerations {#security}
-
-TODO: Expand this section.
-
-# IANA Considerations {#iana}
-
-TODO: Expand this section.
