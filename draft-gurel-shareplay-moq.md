@@ -132,11 +132,15 @@ Until of the latest Media over QUIC Transport draft (draft-ietf-moq-transport-07
 
 ## Playback Control Mechanisms
 
-Playback is initiated by sending a SUBSCRIBE ({{?MoQTransport, Section 6.4}}) control message for the desired media track. The SUBSCRIBE message specifies the track namespace, track name, and a filter type (e.g., Latest Group or Absolute Start) to determine the starting point of the media delivery. Pausing playback is accomplished by sending a specific pause message with its corresponding groupdId via Sync-Track. This stops the publisher from sending further objects for the specified track. To resume playback, the client must issue a Play message again via Sync-Track. In the case of staying inactive for a long-period of time, the client will be unsubscribed automatically via MOQT's UNSUBSCRIBE({{?MoQTransport, Section 6.6}}) via control track. In order to start playback again, the client must send a SUBSCRIBE control message again.
+Playback is initiated by sending a SUBSCRIBE ({{?MoQTransport, Section 6.4}}) control message for the desired media track. The SUBSCRIBE message specifies the track namespace, track name, and a filter type (e.g., Latest Group or Absolute Start) to determine the starting point of the media delivery. Pausing playback is accomplished by sending a specific pause message with its corresponding groupdId via Sync-Track. This stops the publisher from sending further objects for the specified track. To resume playback, the client must issue a Play message again via Sync-Track. In the case of staying inactive for a long-period of time, the client will be unsubscribed automatically via MOQT's UNSUBSCRIBE ({{?MoQTransport, Section 6.6}}) via control track. In order to start playback again, the client must send a SUBSCRIBE control message again.
 
 Seeking to a specific position within a track is supported using the Seek message via Sync-Track, with the corresponding groupdId.  This allows the client to request media starting from a specific group, and continue receiving in a push-content fashion. However, this functionality requires that the publisher supports the ability to serve media from arbitrary positions within the track, which may not be universally available in all implementations. This is discussed in section 4 in detail.
 
 This document introduces new Sync-track messages, which can only be sent by the Leader client. When the Leader client sends these messages, a compatible publisher will respond by playing, pausing, or seeking as instructed. Upon receiving a "pause" command, the publisher halts broadcasting at the specified group id, freezing playback until a "play" command resumes it from the paused position. A "seek" command directs the publisher to calculate the frame corresponding to the provided group id and restart broadcasting from that frame. This mechanism ensures all subscribers (or clients) remain synchronized, allowing them to watch the stream simultaneously from the adjusted playback point.
+
+### Decoupling Seek from Play/Pause
+
+The SEEK operation functions independently of PLAY and PAUSE commands. A client can issue a SEEK command regardless of the current playback state. This means a client may seek to a different position while paused and later resume playback from the new position. Likewise, if a client is currently playing, a SEEK command will override the current playback position without requiring a PAUSE beforehand.
 
 ## Sync-Track Messages
 
@@ -163,13 +167,16 @@ Each message type (PLAY, PAUSE, SEEK) is identified by its unique Message Type I
 |-------|-----------------------------------------------------|
 | 0x3   | SEEK ({{message-seek}})                             |
 |-------|-----------------------------------------------------|
+| 0x4   | STATUS ({{message-status}})                         |
+|-------|-----------------------------------------------------|
+
 
 ### PLAY {#message-play}
 ~~~
 PLAY Message {
   Type (i) = 0x1,
   Length (i),
-  Timestamp (..),
+  Timestamp (i),
 }
 ~~~
 {: #shareplay-moq-play-format title="Sync-Track PLAY Message"}
@@ -179,8 +186,8 @@ PLAY Message {
 PAUSE Message {
   Type (i) = 0x2,
   Length (i),
+  Timestamp (i),
   GroupId (i),
-  Timestamp (..),
 }
 ~~~
 {: #shareplay-moq-pause-format title="Sync-Track PAUSE Message"}
@@ -191,11 +198,35 @@ PAUSE Message {
 SEEK Message {
   Type (i) = 0x3,
   Length (i),
+  Timestamp (i),
   GroupId (i),
-  Timestamp (..),
 }
 ~~~
 {: #shareplay-moq-seek-format title="Sync-Track SEEK Message"}
+
+
+### STATUS {#message-status}
+
+~~~
+STATUS Message {
+  Type (i) = 0x4,
+  Length (i),
+  Timestamp (i),
+  GroupId (i),
+  PlaybackState (i),
+}
+~~~
+{: #shareplay-moq-status-format title="Sync-Track STATUS Message"}
+
+
+## Timestamp for Playback Synchronization
+Each playback control message (PLAY, PAUSE, SEEK) contains a timestamp field, which represents the intended media position when the action is triggered. This timestamp ensures that playback actions (especially SEEK) are synchronized across clients, preventing head-of-line blocking due to out-of-order commands. The publisher uses this timestamp to adjust the playback position accordingly.
+
+## Grouping of Playback Control Messages
+Play and Pause commands must be treated as dependent operations and thus belong to the same control subgroup. However, SEEK operates independently and belongs to a separate subgroup. This separation ensures that Play/Pause messages are processed sequentially within their stream, while SEEK commands are handled in a distinct stream to avoid blocking playback state transitions.
+
+## Playback Status
+To achive better synchronization, a new status reporting message is introduced. This stream carries periodic updates from the publisher, indicating the current playback position, active state (playing/paused), and last acknowledged seek position. Play is represented by "1", Pause is represented by "0". Clients can subscribe to this stream to stay updated on playback state changes.
 
 ## Playback Message Flow
 
