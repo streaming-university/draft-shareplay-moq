@@ -1,11 +1,11 @@
----
-title: "Synchronized Social Video-on-Demand (VoD) Viewing with Media over QUIC"
+—
+title: “Synchronized Social Video-on-Demand (VoD) Viewing with Media over QUIC”
 abbrev: shareplay-moq 
 docname: draft-gurel-shareplay-moq-latest
 date:
   year: 2025
-  month: January
-  day: 31
+  month: February
+  day: 16
 category: exp #or std, info, bcp?
 
 ipr: trust200902
@@ -63,7 +63,7 @@ This draft presents an approach to Synchronized Social Video-on-Demand (VoD) Vie
 
 Media Over QUIC (MoQ) is a novel protocol designed for efficient media streaming over the QUIC transport protocol ({{?RFC9000}}). While MoQ has shown promise for live-edge streaming, its current design lacks support for essential VoD functionalities, such as pause, resume, and seek. Leaving gaps in its applicability for interactive media consumption. This document extends MoQ to enable synchronized VoD playback, introducing mechanisms that allow users to have more control over the media playback.
 
-This document outlines the architectural designs, control mechanisms, and synchronization logic implemented to achieve these objectives. This document's innovations include new MOQT tracks for synchronisation control, a media publisher model for serving on-demand video, and a Leader-Follower client infrastructure to demonstrate the potential of MoQ for enhancing synchronized VoD consumption.
+This document outlines the architectural designs, control mechanisms, and synchronization logic implemented to achieve these objectives. This document's innovations include new MOQT tracks for synchronisation control, an example media publisher model for serving on-demand video, and a Leader-Follower client infrastructure to demonstrate the potential of MoQ for enhancing synchronized VoD consumption.
 
 ## Terms and Definitions
 
@@ -113,30 +113,29 @@ Video-on-Demand (VoD) Session:
 This document uses the conventions detailed in ({{?RFC9000, Section 1.3}})
 when describing the binary encoding.
 
-As a quick reference, the following list provides a non normative summary
-of the parts of RFC9000 field syntax that are used in this specification.
+As a quick reference, the following list provides a non-normative summary
+of the parts of RFC9000 field syntax that are used in this specification:
 
 x (..):
-
-: Indicates that x can be any length including zero bits long.  Values
- in this format always end on a byte boundary.
+: Indicates that x can be any length including zero bits long. Values
+  in this format always end on a byte boundary.
 
 x (i):
 
 : Indicates that x holds an integer value using the variable-length
-  encoding as described in ({{?RFC9000, Section 16}})
+  encoding as described in ({{?RFC9000, Section 16}}).
 
 # Synchronized Playback Control
 
-Until of the latest Media over QUIC Transport draft (draft-ietf-moq-transport-07), MOQT primarily supported a push-based content delivery architecture. The protocol does not explicitly define dedicated control messages for play, pause, or seek operations. Instead, these functionalities are achieved through subscription-based messaging.
+Until the latest Media over QUIC Transport draft (draft-ietf-moq-transport-07), MOQT primarily supported a push-based content delivery architecture. The protocol does not explicitly define dedicated control messages for play, pause, or seek operations. Instead, these functionalities are achieved through subscription-based messaging.
 
 ## Playback Control Mechanisms
 
-Playback is initiated by sending a SUBSCRIBE ({{?MoQTransport, Section 6.4}}) control message for the desired media track. The SUBSCRIBE message specifies the track namespace, track name, and a filter type (e.g., Latest Group or Absolute Start) to determine the starting point of the media delivery. Pausing playback is accomplished by sending a specific pause message with its corresponding groupdId via Sync-Track. This stops the publisher from sending further objects for the specified track. To resume playback, the client must issue a Play message again via Sync-Track. In the case of staying inactive for a long-period of time, the client will be unsubscribed automatically via MOQT's UNSUBSCRIBE ({{?MoQTransport, Section 6.6}}) via control track. In order to start playback again, the client must send a SUBSCRIBE control message again.
+Playback is initiated by sending a SUBSCRIBE ({{?MoQTransport, Section 6.4}}) control message for the desired media track. The SUBSCRIBE message specifies the track namespace, track name, and a filter type (e.g., Latest Group or Absolute Start) to determine the starting point of the media delivery. Pausing playback is accomplished by sending a specific pause message with its corresponding `GroupId` via Sync-Track. This stops the publisher from sending further objects for the specified track. To resume playback, the client must issue a PLAY message again via Sync-Track. In the case of staying inactive for a long period of time, the client will be unsubscribed automatically via MOQT's UNSUBSCRIBE ({{?MoQTransport, Section 6.6}}). In order to start playback again, the client must send a SUBSCRIBE control message.
 
-Seeking to a specific position within a track is supported using the Seek message via Sync-Track, with the corresponding groupdId.  This allows the client to request media starting from a specific group, and continue receiving in a push-content fashion. However, this functionality requires that the publisher supports the ability to serve media from arbitrary positions within the track, which may not be universally available in all implementations. This is discussed in section 4 in detail.
+Seeking to a specific position within a track is supported using the SEEK message via Sync-Track, with the corresponding `GroupId`. This allows the client to request media starting from a specific group, continuing in a push-content fashion. However, this functionality requires that the publisher supports the ability to serve media from arbitrary positions within the track, which may not be universally available in all implementations. This is discussed in Section 4 in detail.
 
-This document introduces new Sync-track messages, which can only be sent by the Leader client. When the Leader client sends these messages, a compatible publisher will respond by playing, pausing, or seeking as instructed. Upon receiving a "pause" command, the publisher halts broadcasting at the specified group id, freezing playback until a "play" command resumes it from the paused position. A "seek" command directs the publisher to calculate the frame corresponding to the provided group id and restart broadcasting from that frame. This mechanism ensures all subscribers (or clients) remain synchronized, allowing them to watch the stream simultaneously from the adjusted playback point.
+This document introduces new Sync-Track messages, which can only be sent by the Leader client. When the Leader client sends these messages, a compatible publisher will respond by playing, pausing, or seeking as instructed. Upon receiving a PAUSE command, the publisher halts broadcasting at the specified `GroupId`, freezing playback until a PLAY command resumes it from the paused position. A SEEK command directs the publisher to calculate the frame corresponding to the provided `GroupId` and restart broadcasting from that frame. This mechanism ensures all subscribers remain synchronized, allowing them to watch the stream simultaneously from the adjusted playback point.
 
 ### Decoupling Seek from Play/Pause
 
@@ -206,7 +205,7 @@ SEEK Message {
 
 
 ### STATUS {#message-status}
-
+`Playing` state is represented by 1, `paused` state is represented by 0 in PlaybackState parameter.
 ~~~
 STATUS Message {
   Type (i) = 0x4,
@@ -216,21 +215,21 @@ STATUS Message {
   PlaybackState (i),
 }
 ~~~
-{: #shareplay-moq-status-format title="Sync-Track STATUS Message"}
 
+{: #shareplay-moq-status-format title="Sync-Track STATUS Message"}
 
 ## Timestamp for Playback Synchronization
 Each playback control message (PLAY, PAUSE, SEEK) contains a timestamp field, which represents the intended media position when the action is triggered. This timestamp ensures that playback actions (especially SEEK) are synchronized across clients, preventing head-of-line blocking due to out-of-order commands. The publisher uses this timestamp to adjust the playback position accordingly.
 
 ## Grouping of Playback Control Messages
-Play and Pause commands must be treated as dependent operations and thus belong to the same control subgroup. However, SEEK operates independently and belongs to a separate subgroup. This separation ensures that Play/Pause messages are processed sequentially within their stream, while SEEK commands are handled in a distinct stream to avoid blocking playback state transitions.
+PLAY and PAUSE commands must be treated as dependent operations and thus belong to the same control subgroup. However, SEEK operates independently and belongs to a separate subgroup. This separation ensures that PLAY/PAUSE messages are processed sequentially within their stream, while SEEK commands are handled in a distinct stream to avoid blocking playback state transitions.
 
 ## Playback Status
-To achive better synchronization, a new status reporting message is introduced. This stream carries periodic updates from the publisher, indicating the current playback position, active state (playing/paused), and last acknowledged seek position. Play is represented by "1", Pause is represented by "0". Clients can subscribe to this stream to stay updated on playback state changes.
+To achieve better synchronization, a new status reporting message is introduced. This stream carries periodic updates from the publisher, indicating the current playback position, active state (playing/paused), and last acknowledged seek position. Clients can subscribe to this stream to stay updated on playback state changes.
 
 ## Playback Message Flow
 
-The following message flow illustrates how playback operations (PLAY, SEEK, and PAUSE) are used through the relay servers, thus enabling clients to stay in a synchronized playback.
+The following message flow illustrates how playback operations (PLAY, SEEK, and PAUSE) are used through the relay servers, thus enabling clients to stay in a synchronized playback:
 
 ~~~ 
 Leader Client             Relay Server(s)               Publisher   Follower Clients  
@@ -269,8 +268,8 @@ For simplicity, no leader election algorithm is implemented in this model. The f
 
 Exclusive Control:
 
-: Only the Leader Client may issue playback sync-track messages (PLAY, PAUSE, SEEK). 
-: The sync-track message requests that are coming from the Follower clients will be forwarded to the Leader Client for review. 
+: Only the Leader Client may issue playback Sync-track messages (PLAY, PAUSE, SEEK). 
+: The Sync-track message requests that are coming from the Follower clients will be forwarded to the Leader Client for review. 
 
 State Propagation:
 
@@ -280,6 +279,110 @@ Leader Failure Handling:
 
 : If the Leader Client disconnects or becomes unresponsive, the lowest-ID active Follower Client assumes the Leader role. The new Leader Client inherits Client ID 0, but subsequent Follower IDs do not change.
 
+# Heartbeat-Based Session Management and Advanced Synchronization
+
+
+
+While the Leader-Follower paradigm handles playback control, additional functionality is needed for:
+
+1. Monitoring client synchronization and connectivity.
+
+2. Handling clients that wish to get out of synchronization or rejoin later.
+
+3. Making group-level decisions in the face of network issues.
+
+
+
+This section defines a “heartbeat” mechanism and outlines how clients can join, leave, and optionally “fall behind” or “skip ahead”.
+
+
+
+## Heartbeat Messages
+
+
+
+Every client (Leader or Follower) periodically sends a **Heartbeat** message to the Relay (or publisher, depending on implementation). The Relay aggregates these messages to maintain an up-to-date view of each client’s playback status and connectivity. A Heartbeat message contains at least:
+
+1. **Local Playback Time**: The client’s current playback position (e.g., Group ID or time offset (PTS) in the video).
+
+2. **Current Global Time**: The client’s global timestamp, allowing the Relay (and/or Leader) to account for the delay in message transmission. 
+
+
+
+### New Client Announcement
+
+
+
+When a new client joins the session, the **first** Heartbeat message includes an additional “New-Client-Join” indicator. This allows the Relay (and indirectly the Leader) to:
+
+- Recognize a new participant in the session.
+
+- Potentially notify other participants (if needed).
+
+
+
+### Heartbeat Timeouts and Disconnections
+
+
+
+Each client is expected to send Heartbeat messages within a pre-decided interval. If a Heartbeat is not received for a duration exceeding that interval (plus some tolerance), the Relay assumes the client has become inactive or disconnected. This triggers either:
+
+- **Temporary Removal**: The Relay marks the client as “inactive” but does not remove them from the session state immediately.
+
+- **Full Removal**: If no further Heartbeat arrives within a longer grace period, the client is marked as “disconnected” and removed from the synchronized group.
+
+
+
+## Out of Sync and Re-Syncing
+
+
+
+A client may decide to pause or seek independently of the group or otherwise desynchronize its playback. For instance, a user might rewind to re-watch a scene without causing the entire group to follow. Such actions are handled as follows:
+
+
+
+1. **Local-Only Rewind/Seek**:  
+
+   The client can apply a local override of its playback buffer. It continues to send Heartbeats but indicates via a flag (e.g., “Out-of-Sync”) that it is not following the group.
+
+2. **Resuming Sync**:  
+
+   Once the client is ready to rejoin synchronized playback, it sends a Heartbeat with a special “Re-Sync Request” flag or re-subscribes to the Sync-Track. The Leader (or Relay) then supplies the necessary offset or group position so the client can jump to the current playback point and synchronize with others.
+
+
+
+## Handling Network Issues and Group Policy
+
+
+
+Clients experiencing connection issues (e.g., low bandwidth or high latency) can degrade the overall group experience if every other client must wait. To mitigate this:
+
+1. **Adaptive Bitrate (ABR) at the Relay**:  
+
+   The Relay can detect from Heartbeat messages that a client is consistently behind or losing packets. It may choose to deliver lower-resolution encodings to that specific client (if available) to help it catch up.
+
+2. **Lobby Policy: Wait vs. Continue**:  
+
+   An initial session-level policy can determine if the group is willing to wait for slow clients or not. If the policy is set to “continue,” the lagging client might partially skip forward (or remain unsynchronized) until network conditions improve. If the policy is set to “wait,” the group collectively applies additional buffering or pause states to allow the slow client to keep up.
+
+
+
+## Fetch-Based Architecture
+
+
+
+The current design builds on MoQ’s push-based content delivery. An upcoming revision (based on [draft-ietf-moq-transport-07] “fetch” functionality) will introduce a more scalable, fetch-oriented mechanism for client synchronization. This approach will further refine:
+
+- The structure of Heartbeat/Status messages.
+
+- How group membership is signaled and updated.
+
+- Interaction between “push” and “fetch” paradigms for adaptive VoD synchronization.
+
+- More effective use of relays for more scalable systems.
+
+
+
 # Security Considerations {#security}
 
 TODO: Expand this section.
@@ -288,7 +391,7 @@ TODO: Expand this section.
 
 TODO: Expand this section.
 
---- back
+— back
 
 # Example Publisher Model
 
@@ -299,10 +402,10 @@ Encoding:
 : Media is encoded in H.264 (AVC) format.  
 
 Containerization:
-: Media is packaged in fragmented MP4 (fMP4) format, where content is divided into discrete "moof" (Movie Fragment) and "mdat" (Media Data) atom pairs.  
+: Media is packaged in fragmented MP4 (fMP4) format, where content is divided into discrete “moof” (Movie Fragment) and “mdat” (Media Data) atom pairs.  
 
 Initialization Segments:
-: The `ftyp` (File Type) and `moov` (Movie Metadata) atoms MUST be prepended to the media file. These provide global metadata (e.g., codec information, track layouts) and are transmitted once per session.  
+: The `ftyp` (File Type) and `moov` (Movie Metadata) atoms are prepended to the media file. These provide global metadata (e.g., codec information, track layouts) and are transmitted once per session.  
 
 ## Publisher (`moq-pub`) Responsibilities  
 Storage Integration:
@@ -311,17 +414,17 @@ Storage Integration:
 Efficient Retrieval of Media:
 : Support arbitrary access to media fragments (moof+mdat pairs) for low-latency seek operations.  
 
-Media Codec: `moq-pub` MUST support H.264 encapsulated in fMP4.  
+Media Codec: `moq-pub` supports H.264 encapsulated in fMP4.  
 
 ## Streaming Mechanism  
 
 Atomic Units:
-: Media is streamed as sequential "moof+mdat" atom pairs, each representing a MoQ *object*. The `moof` atom MUST precede its corresponding `mdat` atom to ensure decodability.  
+: Media is streamed as sequential “moof+mdat” atom pairs, each representing a MoQ *object*. The `moof` atom precedes its corresponding `mdat` atom to ensure decodability.  
  
 Group Mapping:  
 : Each moof+mdat pair corresponds to a frame in the H.264 stream. A group of frames form a Group of Picture (GOP). A GOP begins with an Intra-coded frame (I-frame), followed by Predictive frames (P/B-frames).  
-The `groupdId` parameter in MoQ aligns with the GOP index in H.264. This ensures that seeking to a specific `groupdId` starts playback from the I-frame at the beginning of the requested GOP, enabling correct decoder initialization.  
-Publishers MUST maintain an internal index mapping `groupdId` to the byte offset of the corresponding GOP’s moof+mdat pair.  
+The `GroupId` parameter in MoQ aligns with the GOP index in H.264. This ensures that seeking to a specific `GroupId` starts playback from the I-frame at the beginning of the requested GOP, enabling correct decoder initialization.  
+Publisher maintains an internal index mapping `GroupId` to the byte offset of the corresponding GOP’s moof+mdat pair.  
 
 ### Session Initialization  
 At the start of a streaming session:  
@@ -329,12 +432,12 @@ At the start of a streaming session:
 2. Subsequent objects (moof+mdat pairs) are transmitted incrementally, adhering to the subscriber’s playback state. 
 
 ## Dynamic Playback Control  
-The publisher asynchronously monitors a dedicated `sync-track` for control messages (e.g., `PLAY`, `PAUSE`, `SEEK`) issued by the *Leader Client*.  
+The publisher asynchronously monitors a dedicated `Sync-track` for control messages (e.g., `PLAY`, `PAUSE`, `SEEK`) issued by the *Leader Client*.  
 
 ### Command Processing
-Seek Operations: On receiving a `SEEK { groupdId }` command:  
-: 1. The publisher identifies the start of the nearest GOP boundary for the requested `groupdId`, and resumes publishing from the corresponding frame. 
+Seek Operations: On receiving a SEEK command:  
+: 1. The publisher identifies the start of the nearest GOP boundary for the requested `GroupId`, and resumes publishing from the corresponding frame. 
   2. Streaming resumes from the start of the GOP containing the target I-frame, ensuring all dependent P/B-frames are included for seamless decoding.  
   3. Subscribers receive the full GOP sequence, eliminating decoder errors caused by missing reference frames.  
 Pause/Resume:
-: A `PAUSE` command halts the transmission according to the groupdId specified in the pause message, where groupdId corresponds to current group of the playback. A subsequent `PLAY` command resumes streaming from the next sequential object. 
+: A PAUSE command halts the transmission according to the `GroupId` specified in the pause message, where `GroupId` corresponds to current group of the playback. A subsequent PLAY command resumes streaming from the next sequential object.
