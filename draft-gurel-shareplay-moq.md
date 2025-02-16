@@ -421,7 +421,7 @@ Media Codec: `moq-pub` supports H.264 encapsulated in fMP4.
 ## Streaming Mechanism  
 
 Atomic Units:
-: Media is streamed as sequential "moof+mdat" atom pairs, each representing a MoQ *object*. The `moof` atoms precede its corresponding `mdat` atom to ensure decodability.
+: Media is streamed as sequential "moof+mdat" atom pairs, each representing a MoQ *object*. The `moof` atom precedes its corresponding `mdat` atom to ensure decodability.
  
 Group Mapping:
 : Each moof+mdat pair corresponds to a frame in the H.264 stream. A group of frames form a Group of Picture (GOP). A GOP begins with an Intra-coded frame (I-frame), followed by Predictive frames (P/B-frames).
