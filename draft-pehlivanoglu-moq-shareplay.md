@@ -57,7 +57,7 @@ normative:
 
 --- abstract
 
-This draft presents an approach for synchronized video-on-demand (VoD) viewing with Media over QUIC Transport (MOQT). It extends the current MOQT protocol to enable synchronized VoD functionality. This approach adapts MoQ’s push-content architecture to include interactive features such as pause, resume and seek.
+This draft presents an approach for synchronized video-on-demand (VoD) viewing with Media over QUIC Transport (MOQT). It extends the current MOQT protocol to enable synchronized VoD functionality. This approach adapts MOQ’s push-content architecture to include interactive features such as pause, resume and seek.
 
 --- middle
 
@@ -78,31 +78,31 @@ Server:
 : An entity that accepts incoming MOQT sessions and provides media content.
 
 Endpoint:
-: A Client or Server participating in a MoQ session.
+: A Client or Server participating in a MOQT session.
 
 Producer:
-: An endpoint that publishes media content to a MoQ network.
+: An endpoint that publishes media content to a MOQT network.
 
 Consumer:
-: An endpoint that subscribes to and receives media content from a MoQ network.
+: An endpoint that subscribes to and receives media content from a MOQT network.
 
 Relay:
-: An intermediary node in a MoQ network that forwards media content between Producers and Consumers.
+: An intermediary node in a MOQT network that forwards media content between Producers and Consumers.
 
 Track:
-: A logical media stream (e.g., video or audio). Tracks contain a sequential series of Groups and serve as the primary subscribable entity in MoQT ({{?MoQTransport, Section 2.4}}).
+: A logical media stream (e.g., video or audio). Tracks contain a sequential series of Groups and serve as the primary subscribable entity in MOQT ({{MoQTransport, Section 2.4}}).
 
 Group:
-: A temporally sequential set of Objects within a Track. A Group provides a synchronization point within a stream ({{?MoQTransport, Section 2.3}}).
+: A temporally sequential set of Objects within a Track. A Group provides a synchronization point within a stream ({{MoQTransport, Section 2.3}}).
 
 Object:
-: A discrete, addressable unit of media data within a Group. Objects contain media payloads (e.g., video frames or audio samples) ({{?MoQTransport, Section 2.1}}).
+: A discrete, addressable unit of media data within a Group. Objects contain media payloads (e.g., video frames or audio samples) ({{MoQTransport, Section 2.1}}).
 
 Sync-Track:
 : A dedicated track used to synchronize playback across multiple clients by transmitting PLAY, PAUSE and SEEK commands.
 
 Leader Client:
-: The designated control authority within a synchronized playback session. The Leader client issues playback control messages ({{?MoQTransport, Section 7}}) that all consumers must follow.
+: The designated control authority within a synchronized playback session. The Leader client issues playback control messages ({{MoQTransport, Section 7}}) that all consumers must follow.
 
 Follower Client:
 : A consumer that follows playback instructions from the Leader client to maintain synchronization.
@@ -134,7 +134,7 @@ The MOQT protocol does not explicitly define dedicated control messages for play
 
 ## Playback Control Mechanisms
 
-Playback is initiated by sending a SUBSCRIBE ({{?MoQTransport, Section 7.4}}) control message for the desired media track. The SUBSCRIBE message specifies the track namespace, track name and a filter type (e.g., Latest Group or Absolute Start) to determine the starting point of the media delivery. Pausing playback is accomplished by sending a specific PAUSE message with its corresponding Group ID via Sync-Track. This stops the publisher from sending further objects for the specified track. To resume playback, the client issues a PLAY message again via Sync-Track. In the case of staying inactive for an extended period of time, the client will be unsubscribed automatically via MOQT's UNSUBSCRIBE ({{?MoQTransport, Section 7.6}}). To start the playback again, the client sends a SUBSCRIBE message.
+Playback is initiated by sending a SUBSCRIBE ({{MoQTransport, Section 7.4}}) control message for the desired media track. The SUBSCRIBE message specifies the track namespace, track name and a filter type (e.g., Latest Group or Absolute Start) to determine the starting point of the media delivery. Pausing playback is accomplished by sending a specific PAUSE message with its corresponding Group ID via Sync-Track. This stops the publisher from sending further objects for the specified track. To resume playback, the client issues a PLAY message again via Sync-Track. In the case of staying inactive for an extended period of time, the client will be unsubscribed automatically via MOQT's UNSUBSCRIBE ({{MoQTransport, Section 7.6}}). To start the playback again, the client sends a SUBSCRIBE message.
 
 Seeking to a specific position within a track is supported using the SEEK message via Sync-Track, with the corresponding Group ID. This allows the client to request media starting from a specific group and continuing in a push-content fashion. However, this functionality requires that the publisher supports the ability to serve media from arbitrary positions within the track, which may not be universally available in all implementations. This is discussed in Section 4 in detail.
 
@@ -367,7 +367,7 @@ Clients experiencing connection issues (e.g., low bandwidth or high latency) can
 
 
 
-The current design builds on MoQ’s push-based content delivery. An upcoming revision (based on [draft-ietf-moq-transport-07] FETCH functionality) will introduce a more scalable, fetch-oriented mechanism for client synchronization. This approach will further refine:
+The current design builds on MOQ’s push-based content delivery. The current revision introduces a more scalable, fetch-oriented mechanism for client synchronization. This approach will further refine:
 
 - The structure of heartbeat/status messages.
 
@@ -390,7 +390,7 @@ TODO.
 
 # Example Publisher Model
 
-This section defines an example architecture for adapting Media over QUIC (MoQ) to Video-on-Demand (VoD) use cases. The model enables efficient retrieval and streaming of archived fragmented MP4 (fMP4) content through a specialized publisher (`moq-pub`), while maintaining compatibility with live-edge workflows.
+This section defines an example architecture for adapting MOQT to VoD use cases. The model enables efficient retrieval and streaming of archived fragmented MP4 (fMP4) content through a specialized publisher (`moq-pub`), while maintaining compatibility with live-edge workflows.
 
 ## Media Preparation
 Encoding:
@@ -414,11 +414,11 @@ Media Codec: `moq-pub` supports H.264 encapsulated in fMP4.
 ## Streaming Mechanism
 
 Atomic Units:
-: Media is streamed as sequential "moof+mdat" atom pairs, each representing a MoQ *object*. The `moof` atom precedes its corresponding `mdat` atom to ensure decodability.
+: Media is streamed as sequential "moof+mdat" atom pairs, each representing a MOQT *object*. The `moof` atom precedes its corresponding `mdat` atom to ensure decodability.
 
 Group Mapping:
-: Each moof+mdat pair corresponds to a frame in the H.264 stream. A group of frames form a Group of Picture (GOP). A GOP begins with an Intra-coded frame (I-frame), followed by Predictive frames (P/B-frames).
-The `Group ID` parameter in MoQ aligns with the GOP index in H.264. This ensures that seeking to a specific `Group ID` starts playback from the I-frame at the beginning of the requested GOP, enabling correct decoder initialization.
+: Each moof+mdat pair corresponds to a frame in the H.264 stream. A group of frames form a Group of Pictures (GOP). A GOP begins with an intra-coded frame (I-frame), followed by predictively-encoded frames (P/B-frames).
+The `Group ID` parameter in MOQT aligns with the GOP index in H.264. This ensures that seeking to a specific `Group ID` starts playback from the I-frame at the beginning of the requested GOP, enabling correct decoder initialization.
 Publisher maintains an internal index mapping `Group ID` to the byte offset of the corresponding GOP’s moof+mdat pair.
 
 ### Session Initialization
