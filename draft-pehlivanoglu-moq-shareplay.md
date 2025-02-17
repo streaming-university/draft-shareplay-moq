@@ -102,7 +102,7 @@ Sync-Track:
 : A dedicated track used to synchronize playback across multiple clients by transmitting PLAY, PAUSE and SEEK commands.
 
 Leader Client:
-: The designated control authority within a synchronized playback session. The Leader client issues playback control messages ({{?MoQTransport, Section 6}}) that all consumers must follow.
+: The designated control authority within a synchronized playback session. The Leader client issues playback control messages ({{?MoQTransport, Section 7}}) that all consumers must follow.
 
 Follower Client:
 : A consumer that follows playback instructions from the Leader client to maintain synchronization.
@@ -134,7 +134,7 @@ The MOQT protocol does not explicitly define dedicated control messages for play
 
 ## Playback Control Mechanisms
 
-Playback is initiated by sending a SUBSCRIBE ({{?MoQTransport, Section 6.4}}) control message for the desired media track. The SUBSCRIBE message specifies the track namespace, track name and a filter type (e.g., Latest Group or Absolute Start) to determine the starting point of the media delivery. Pausing playback is accomplished by sending a specific PAUSE message with its corresponding Group ID via Sync-Track. This stops the publisher from sending further objects for the specified track. To resume playback, the client issues a PLAY message again via Sync-Track. In the case of staying inactive for an extended period of time, the client will be unsubscribed automatically via MOQT's UNSUBSCRIBE ({{?MoQTransport, Section 6.6}}). To start the playback again, the client sends a SUBSCRIBE message.
+Playback is initiated by sending a SUBSCRIBE ({{?MoQTransport, Section 7.4}}) control message for the desired media track. The SUBSCRIBE message specifies the track namespace, track name and a filter type (e.g., Latest Group or Absolute Start) to determine the starting point of the media delivery. Pausing playback is accomplished by sending a specific PAUSE message with its corresponding Group ID via Sync-Track. This stops the publisher from sending further objects for the specified track. To resume playback, the client issues a PLAY message again via Sync-Track. In the case of staying inactive for an extended period of time, the client will be unsubscribed automatically via MOQT's UNSUBSCRIBE ({{?MoQTransport, Section 7.6}}). To start the playback again, the client sends a SUBSCRIBE message.
 
 Seeking to a specific position within a track is supported using the SEEK message via Sync-Track, with the corresponding Group ID. This allows the client to request media starting from a specific group and continuing in a push-content fashion. However, this functionality requires that the publisher supports the ability to serve media from arbitrary positions within the track, which may not be universally available in all implementations. This is discussed in Section 4 in detail.
 
