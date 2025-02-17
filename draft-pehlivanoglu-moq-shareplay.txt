@@ -11,17 +11,17 @@ Expires: 21 August 2025                                         Z. Gurel
                                                         17 February 2025
 
 
- Synchronized Social Video-on-Demand (VoD) Viewing with Media over QUIC
+    Synchronized Video-on-Demand (VoD) Viewing with Media over QUIC
                                Transport
-                draft-pehlivanoglu-shareplay-moq-latest
+                draft-pehlivanoglu-moq-shareplay-latest
 
 Abstract
 
-   This draft presents an approach for synchronized social video-on-
-   demand (VoD) viewing with Media over QUIC Transport (MOQT).  It
-   extends the current MOQT protocol to enable synchronized VoD
-   functionality.  This approach adapts MoQ’s push-content architecture
-   to include interactive features such as pause, resume and seek.
+   This draft presents an approach for synchronized video-on-demand
+   (VoD) viewing with Media over QUIC Transport (MOQT).  It extends the
+   current MOQT protocol to enable synchronized VoD functionality.  This
+   approach adapts MoQ’s push-content architecture to include
+   interactive features such as pause, resume and seek.
 
 Status of This Memo
 
