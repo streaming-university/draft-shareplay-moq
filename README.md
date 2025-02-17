@@ -7,7 +7,6 @@ This is the working area for the Internet-Draft, "Synchronized Video-on-Demand (
 * [Working Group Draft](https://datatracker.ietf.org/doc/html/draft-pehlivanoglu-shareplay)
 * [Compare Editor's Copy to Working Group Draft](https://streaming-university.github.io/draft-shareplay-moq/#go.draft-pehlivanoglu-shareplay.diff)
 
-
 ## Command Line Usage
 
 Formatted text and HTML versions of the draft can be built using `make`.
