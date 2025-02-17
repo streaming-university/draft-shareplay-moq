@@ -252,10 +252,9 @@ Table of Contents
    Each message type (PLAY, PAUSE, SEEK) is identified by its unique
    Message Type ID and follows a structured format to ensure integration
    with the MOQT transport mechanisms.  These messages are reliably
-   delivered and processed in sequence, maintaining synchronization
-   among all session participants.  Since the Sync-Track messages are
-   standard MOQT objects, they leverage the existing MOQT stream
-   handling mechanisms.
+   delivered, maintaining synchronization among all session
+   participants.  Since the Sync-Track messages are standard MOQT
+   objects, they leverage the existing MOQT stream handling mechanisms.
 
                      +=====+========================+
                      |  ID | Messages               |
@@ -329,11 +328,11 @@ Table of Contents
 
 2.4.  Grouping of Playback Control Messages
 
-   The Play and Pause commands must be treated as dependent operations
+   The PLAY and PAUSE commands must be treated as dependent operations
    and thus belong to the same control subgroup.  However, SEEK operates
    independently and belongs to a separate subgroup.  This separation
    ensures that PLAY/PAUSE messages are processed sequentially within
-   their stream, while the SEEK commands are handled in a distinct
+   their stream, while the SEEK commands are handled in a separate
    stream to avoid blocking the playback state transitions.
 
 2.5.  Playback Status

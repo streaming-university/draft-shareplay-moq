@@ -1451,7 +1451,7 @@ Sync-Track Message {
 <a href="#name-overall-sync-track-message-" class="selfRef">Overall Sync-Track message format</a>
           </figcaption></figure>
 </div>
-<p id="section-2.2-3">Each message type (PLAY, PAUSE, SEEK) is identified by its unique Message Type ID and follows a structured format to ensure integration with the MOQT transport mechanisms. These messages are reliably delivered and processed in sequence, maintaining synchronization among all session participants. Since the Sync-Track messages are standard MOQT objects, they leverage the existing MOQT stream handling mechanisms.<a href="#section-2.2-3" class="pilcrow">¶</a></p>
+<p id="section-2.2-3">Each message type (PLAY, PAUSE, SEEK) is identified by its unique Message Type ID and follows a structured format to ensure integration with the MOQT transport mechanisms. These messages are reliably delivered, maintaining synchronization among all session participants. Since the Sync-Track messages are standard MOQT objects, they leverage the existing MOQT stream handling mechanisms.<a href="#section-2.2-3" class="pilcrow">¶</a></p>
 <table class="center" id="table-1">
           <caption><a href="#table-1" class="selfRef">Table 1</a></caption>
 <thead>
@@ -1587,7 +1587,7 @@ STATUS Message {
         <h3 id="name-grouping-of-playback-contro">
 <a href="#section-2.4" class="section-number selfRef">2.4. </a><a href="#name-grouping-of-playback-contro" class="section-name selfRef">Grouping of Playback Control Messages</a>
         </h3>
-<p id="section-2.4-1">The Play and Pause commands must be treated as dependent operations and thus belong to the same control subgroup. However, SEEK operates independently and belongs to a separate subgroup. This separation ensures that PLAY/PAUSE messages are processed sequentially within their stream, while the SEEK commands are handled in a distinct stream to avoid blocking the playback state transitions.<a href="#section-2.4-1" class="pilcrow">¶</a></p>
+<p id="section-2.4-1">The PLAY and PAUSE commands must be treated as dependent operations and thus belong to the same control subgroup. However, SEEK operates independently and belongs to a separate subgroup. This separation ensures that PLAY/PAUSE messages are processed sequentially within their stream, while the SEEK commands are handled in a separate stream to avoid blocking the playback state transitions.<a href="#section-2.4-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="playback-status">
