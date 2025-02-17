@@ -4,7 +4,7 @@
 
 MOQ                                                      A. Pehlivanoglu
 Internet-Draft                                                 K. Bekmez
-Intended status: Experimental                           B. Yumakogullari
+Intended status: Informational                          B. Yumakogullari
 Expires: 21 August 2025                                         Z. Gurel
                                                                 A. Begen
                                                       Ozyegin University
@@ -20,7 +20,7 @@ Abstract
    This draft presents an approach for synchronized video-on-demand
    (VoD) viewing with Media over QUIC Transport (MOQT).  It extends the
    current MOQT protocol to enable synchronized VoD functionality.  This
-   approach adapts MoQ’s push-content architecture to include
+   approach adapts MOQ’s push-content architecture to include
    interactive features such as pause, resume and seek.
 
 Status of This Memo
@@ -128,19 +128,20 @@ Table of Contents
    Server:  An entity that accepts incoming MOQT sessions and provides
       media content.
 
-   Endpoint:  A Client or Server participating in a MoQ session.
+   Endpoint:  A Client or Server participating in a MOQT session.
 
-   Producer:  An endpoint that publishes media content to a MoQ network.
+   Producer:  An endpoint that publishes media content to a MOQT
+      network.
 
    Consumer:  An endpoint that subscribes to and receives media content
-      from a MoQ network.
+      from a MOQT network.
 
-   Relay:  An intermediary node in a MoQ network that forwards media
+   Relay:  An intermediary node in a MOQT network that forwards media
       content between Producers and Consumers.
 
    Track:  A logical media stream (e.g., video or audio).  Tracks
       contain a sequential series of Groups and serve as the primary
-      subscribable entity in MoQT ([MoQTransport], Section 2.4).
+      subscribable entity in MOQT ([MoQTransport], Section 2.4).
 
    Group:  A temporally sequential set of Objects within a Track.  A
       Group provides a synchronization point within a stream
@@ -155,7 +156,7 @@ Table of Contents
 
    Leader Client:  The designated control authority within a
       synchronized playback session.  The Leader client issues playback
-      control messages ([MoQTransport], Section 6) that all consumers
+      control messages ([MoQTransport], Section 7) that all consumers
       must follow.
 
    Follower Client:  A consumer that follows playback instructions from
@@ -188,7 +189,7 @@ Table of Contents
 2.1.  Playback Control Mechanisms
 
    Playback is initiated by sending a SUBSCRIBE ([MoQTransport],
-   Section 6.4) control message for the desired media track.  The
+   Section 7.4) control message for the desired media track.  The
    SUBSCRIBE message specifies the track namespace, track name and a
    filter type (e.g., Latest Group or Absolute Start) to determine the
    starting point of the media delivery.  Pausing playback is
@@ -198,7 +199,7 @@ Table of Contents
    the client issues a PLAY message again via Sync-Track.  In the case
    of staying inactive for an extended period of time, the client will
    be unsubscribed automatically via MOQT's UNSUBSCRIBE ([MoQTransport],
-   Section 6.6).  To start the playback again, the client sends a
+   Section 7.6).  To start the playback again, the client sends a
    SUBSCRIBE message.
 
    Seeking to a specific position within a track is supported using the
@@ -246,7 +247,7 @@ Table of Contents
      Message Payload (..),
    }
 
-                Figure 1: Overall Sync-Track Message Format
+                Figure 1: Overall Sync-Track message format
 
    Each message type (PLAY, PAUSE, SEEK) is identified by its unique
    Message Type ID and follows a structured format to ensure integration
@@ -278,7 +279,7 @@ Table of Contents
      Timestamp (i),
    }
 
-                     Figure 2: Sync-Track PLAY Message
+                     Figure 2: Sync-Track PLAY message
 
 2.2.2.  PAUSE
 
@@ -289,7 +290,7 @@ Table of Contents
      Group ID (i),
    }
 
-                     Figure 3: Sync-Track PAUSE Message
+                     Figure 3: Sync-Track PAUSE message
 
 2.2.3.  SEEK
 
@@ -300,7 +301,7 @@ Table of Contents
      Group ID (i),
    }
 
-                     Figure 4: Sync-Track SEEK Message
+                     Figure 4: Sync-Track SEEK message
 
 2.2.4.  STATUS
 
@@ -315,7 +316,7 @@ Table of Contents
      PlaybackState (i),
    }
 
-                    Figure 5: Sync-Track STATUS Message
+                    Figure 5: Sync-Track STATUS message
 
 2.3.  Timestamp for Playback Synchronization
 
@@ -438,14 +439,14 @@ Leader Client             Relay Server(s)               Publisher   Follower Cli
        (e.g., Group ID or time offset (PTS) in the video).
 
    2.  *Current Global Time*: The client’s global timestamp, allowing
-       the Relay (and/or Leader) to account for the delay in message
+       the relay (and/or Leader) to account for the delay in message
        transmission.
 
 4.1.1.  New Client Announcement
 
    When a new client joins the session, the *first* heartbeat message
    includes an additional “New-Client-Join” indicator.  This allows the
-   Relay (and indirectly the Leader) to:
+   relay (and indirectly the Leader) to:
 
    *  Recognize a new participant in the session.
 
@@ -455,10 +456,10 @@ Leader Client             Relay Server(s)               Publisher   Follower Cli
 
    Each client is expected to send heartbeat messages within a pre-
    decided interval.  If a heartbeat is not received for a duration
-   exceeding that interval (plus some tolerance), the Relay assumes the
+   exceeding that interval (plus some tolerance), the relay assumes the
    client has become inactive or disconnected.  This triggers either:
 
-   *  *Temporary Removal*: The Relay marks the client as “inactive” but
+   *  *Temporary Removal*: The relay marks the client as “inactive” but
       does not remove them from the session state immediately.
 
    *  *Full Removal*: If no further heartbeat arrives within a longer
@@ -482,7 +483,7 @@ Leader Client             Relay Server(s)               Publisher   Follower Cli
 
        Once the client is ready to rejoin synchronized playback, it
        sends a heartbeat with a special “Re-Sync Request” flag or re-
-       subscribes to the Sync-Track.  The Leader (or Relay) then
+       subscribes to the Sync-Track.  The Leader (or relay) then
        supplies the necessary offset or group position so the client can
        jump to the current playback point and synchronize with others.
 
@@ -494,7 +495,7 @@ Leader Client             Relay Server(s)               Publisher   Follower Cli
 
    1.  *Adaptive Bitrate (ABR) at the Relay*:
 
-       The Relay can detect from heartbeat messages that a client is
+       The relay can detect from heartbeat messages that a client is
        consistently behind or losing packets.  It may choose to deliver
        lower-resolution encodings to that specific client (if available)
        to help it catch up.
@@ -511,11 +512,9 @@ Leader Client             Relay Server(s)               Publisher   Follower Cli
 
 4.4.  Fetch-Based Architecture
 
-   The current design builds on MoQ’s push-based content delivery.  An
-   upcoming revision (based on [draft-ietf-moq-transport-07] FETCH
-   functionality) will introduce a more scalable, fetch-oriented
-   mechanism for client synchronization.  This approach will further
-   refine:
+   The current design builds on MOQ’s push-based content delivery.  The
+   current revision introduces a more scalable, fetch-oriented mechanism
+   for client synchronization.  This approach will further refine:
 
    *  The structure of heartbeat/status messages.
 
@@ -538,6 +537,13 @@ Leader Client             Relay Server(s)               Publisher   Follower Cli
 
 7.1.  Normative References
 
+   [MoQTransport]
+              Curley, L., Pugin, K., Nandakumar, S., Vasiliev, V., and
+              I. Swett, "Media over QUIC Transport", Work in Progress,
+              Internet-Draft, draft-ietf-moq-transport-08, 12 February
+              2025, <https://datatracker.ietf.org/doc/html/draft-ietf-
+              moq-transport-08>.
+
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997,
@@ -549,13 +555,6 @@ Leader Client             Relay Server(s)               Publisher   Follower Cli
 
 7.2.  Informative References
 
-   [MoQTransport]
-              Curley, L., Pugin, K., Nandakumar, S., Vasiliev, V., and
-              I. Swett, "Media over QUIC Transport", Work in Progress,
-              Internet-Draft, draft-ietf-moq-transport-08, 12 February
-              2025, <https://datatracker.ietf.org/doc/html/draft-ietf-
-              moq-transport-08>.
-
    [RFC9000]  Iyengar, J., Ed. and M. Thomson, Ed., "QUIC: A UDP-Based
               Multiplexed and Secure Transport", RFC 9000,
               DOI 10.17487/RFC9000, May 2021,
@@ -563,11 +562,11 @@ Leader Client             Relay Server(s)               Publisher   Follower Cli
 
 Appendix A.  Example Publisher Model
 
-   This section defines an example architecture for adapting Media over
-   QUIC (MoQ) to Video-on-Demand (VoD) use cases.  The model enables
-   efficient retrieval and streaming of archived fragmented MP4 (fMP4)
-   content through a specialized publisher (moq-pub), while maintaining
-   compatibility with live-edge workflows.
+   This section defines an example architecture for adapting MOQT to VoD
+   use cases.  The model enables efficient retrieval and streaming of
+   archived fragmented MP4 (fMP4) content through a specialized
+   publisher (moq-pub), while maintaining compatibility with live-edge
+   workflows.
 
 A.1.  Media Preparation
 
@@ -596,16 +595,16 @@ A.2.  Publisher (moq-pub) Responsibilities
 A.3.  Streaming Mechanism
 
    Atomic Units:  Media is streamed as sequential "moof+mdat" atom
-      pairs, each representing a MoQ _object_. The moof atom precedes
+      pairs, each representing a MOQT _object_. The moof atom precedes
       its corresponding mdat atom to ensure decodability.
 
    Group Mapping:  Each moof+mdat pair corresponds to a frame in the
-      H.264 stream.  A group of frames form a Group of Picture (GOP).  A
-      GOP begins with an Intra-coded frame (I-frame), followed by
-      Predictive frames (P/B-frames).  The Group ID parameter in MoQ
-      aligns with the GOP index in H.264.  This ensures that seeking to
-      a specific Group ID starts playback from the I-frame at the
-      beginning of the requested GOP, enabling correct decoder
+      H.264 stream.  A group of frames form a Group of Pictures (GOP).
+      A GOP begins with an intra-coded frame (I-frame), followed by
+      predictively-encoded frames (P/B-frames).  The Group ID parameter
+      in MOQT aligns with the GOP index in H.264.  This ensures that
+      seeking to a specific Group ID starts playback from the I-frame at
+      the beginning of the requested GOP, enabling correct decoder
       initialization.  Publisher maintains an internal index mapping
       Group ID to the byte offset of the corresponding GOP’s moof+mdat
       pair.
