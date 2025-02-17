@@ -2,10 +2,10 @@
 
 This is the working area for the Internet-Draft, "Synchronized Video-on-Demand (VoD) Viewing with Media over QUIC Transpor".
 
-* [Editor's Copy](https://streaming-university.github.io/draft-shareplay-moq/#go.draft-pehlivanoglu-shareplay.html)
-* [Datatracker Page](https://datatracker.ietf.org/doc/draft-pehlivanoglu-shareplay)
-* [Working Group Draft](https://datatracker.ietf.org/doc/html/draft-pehlivanoglu-shareplay)
-* [Compare Editor's Copy to Working Group Draft](https://streaming-university.github.io/draft-shareplay-moq/#go.draft-pehlivanoglu-shareplay.diff)
+* [Editor's Copy](https://streaming-university.github.io/draft-shareplay-moq/#go.draft-pehlivanoglu-shareplay-moq.html)
+* [Datatracker Page](https://datatracker.ietf.org/doc/draft-pehlivanoglu-shareplay-moq)
+* [Working Group Draft](https://datatracker.ietf.org/doc/html/draft-pehlivanoglu-shareplay-moq)
+* [Compare Editor's Copy to Working Group Draft](https://streaming-university.github.io/draft-shareplay-moq/#go.draft-pehlivanoglu-shareplay-moq.diff)
 
 ## Command Line Usage
 
