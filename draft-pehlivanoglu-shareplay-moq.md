@@ -1,15 +1,15 @@
 ---
-title: "Synchronized Social Video-on-Demand (VoD) Viewing with Media over QUIC"
+title: "Synchronized Social Video-on-Demand (VoD) Viewing with Media over QUIC Transport"
 abbrev: shareplay-moq
-docname: draft-gurel-shareplay-moq-latest
+docname: draft-pehlivanoglu-shareplay-moq-latest
 date:
   year: 2025
   month: February
-  day: 16
+  day: 17
 category: exp #or std, info, bcp?
 
 ipr: trust200902
-area: Applications and Real-Time
+area: Web and Internet Transport
 submissionType: IETF
 workgroup: MOQ
 keyword: Internet-Draft
@@ -57,25 +57,25 @@ informative:
 
 --- abstract
 
-This draft presents an approach to Synchronized Social Video-on-Demand (VoD) Viewing with Media over QUIC. Extending current Media Over QUIC Transport (MOQT) protocol to enable synchronized Video-on-Demand (VoD) functionality. This approach adapts MoQ’s push-content architecture to include interactive features such as pause, resume, and seek. Addressing limitations in current implementations.
+This draft presents an approach for synchronized social video-on-demand (VoD) viewing with Media over QUIC Transport (MOQT). It extends the current MOQT protocol to enable synchronized VoD functionality. This approach adapts MoQ’s push-content architecture to include interactive features such as pause, resume and seek.
 
 --- middle
 
 # Introduction
 
-Media Over QUIC Transport (MOQT) is a novel protocol designed for efficient media streaming over the QUIC transport protocol ({{?RFC9000}}). While MoQ has shown promise for live-edge streaming, its current design lacks support for essential VoD functionalities, such as pause, resume, and seek. Leaving gaps in its applicability for interactive media consumption. This document extends MoQ to enable synchronized VoD playback, introducing mechanisms that allow users to have more control over the media playback.
+Media Over QUIC Transport (MOQT) is a novel protocol designed for efficient media streaming over the QUIC transport protocol ({{?RFC9000}}). While MOQT has shown promise for live-edge streaming, its current design lacks support for essential VoD functionalities, such as pause, resume and seek, leaving gaps in its applicability for interactive media consumption. This document extends MOQT to enable synchronized VoD playback, introducing mechanisms that allow users to have more control over the media playback.
 
-This document outlines the architectural designs, control mechanisms, and synchronization logic implemented to achieve these objectives. This document's innovations include new MOQT tracks for synchronisation control, an example media publisher model for serving on-demand video, and a Leader-Follower client infrastructure to demonstrate the potential of MoQ for enhancing synchronized VoD consumption.
+This document outlines the architectural design, control mechanisms and synchronization logic implemented to achieve these objectives. This document's innovations include new MOQT tracks for synchronization control, an example media publisher model for serving on-demand video and a Leader-Follower model to demonstrate the potential of MOQT for enhancing synchronized VoD consumption.
 
 ## Terms and Definitions
 
 {::boilerplate bcp14-tagged}
 
 Client:
-: An entity that initiates a MoQT session and requests media content.
+: An entity that initiates a MOQT session and requests media content.
 
 Server:
-: An entity that accepts incoming MoQT sessions and provides media content.
+: An entity that accepts incoming MOQT sessions and provides media content.
 
 Endpoint:
 : A Client or Server participating in a MoQ session.
@@ -99,16 +99,16 @@ Object:
 : A discrete, addressable unit of media data within a Group. Objects contain media payloads (e.g., video frames or audio samples) ({{?MoQTransport, Section 2.1}}).
 
 Sync-Track:
-: A dedicated track used for synchronizing playback across multiple clients by transmitting PLAY, PAUSE, and SEEK commands.
+: A dedicated track used to synchronize playback across multiple clients by transmitting PLAY, PAUSE and SEEK commands.
 
 Leader Client:
-: The designated control authority within a synchronized playback session. The Leader Client issues playback control messages ({{?MoQTransport, Section 6}}) that all Consumers must follow.
+: The designated control authority within a synchronized playback session. The leader client issues playback control messages ({{?MoQTransport, Section 6}}) that all consumers must follow.
 
 Follower Client:
-: A Consumer that follows playback instructions from the Leader Client to maintain synchronization.
+: A consumer that follows playback instructions from the leader client to maintain synchronization.
 
 Video-on-Demand (VoD) Session:
-: A MoQ-based session where pre-recorded media is streamed with user-controlled playback features.
+: A session where pre-recorded media is streamed with user-controlled playback features.
 
 ## Notational Conventions
 
