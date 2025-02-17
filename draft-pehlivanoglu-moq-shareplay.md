@@ -6,7 +6,7 @@ date:
   year: 2025
   month: February
   day: 17
-category: exp #or std, info, bcp?
+category: info #exp or std, info, bcp?
 
 ipr: trust200902
 area: Web and Internet Transport
@@ -51,7 +51,7 @@ author:
 
 
 
-informative:
+normative:
   MoQTransport: I-D.ietf-moq-transport
 
 
@@ -155,7 +155,7 @@ Sync-Track Message {
   Message Payload (..),
 }
 ~~~
-{: #shareplay-moq-message-format title="Overall Sync-Track Message Format"}
+{: #shareplay-moq-message-format title="Overall Sync-Track message format"}
 
 Each message type (PLAY, PAUSE, SEEK) is identified by its unique Message Type ID and follows a structured format to ensure integration with the MOQT transport mechanisms. These messages are reliably delivered and processed in sequence, maintaining synchronization among all session participants. Since the Sync-Track messages are standard MOQT objects, they leverage the existing MOQT stream handling mechanisms.
 
@@ -181,7 +181,7 @@ PLAY Message {
   Timestamp (i),
 }
 ~~~
-{: #shareplay-moq-play-format title="Sync-Track PLAY Message"}
+{: #shareplay-moq-play-format title="Sync-Track PLAY message"}
 
 ### PAUSE {#message-pause}
 ~~~
@@ -192,7 +192,7 @@ PAUSE Message {
   Group ID (i),
 }
 ~~~
-{: #shareplay-moq-pause-format title="Sync-Track PAUSE Message"}
+{: #shareplay-moq-pause-format title="Sync-Track PAUSE message"}
 
 ### SEEK {#message-seek}
 
@@ -204,7 +204,7 @@ SEEK Message {
   Group ID (i),
 }
 ~~~
-{: #shareplay-moq-seek-format title="Sync-Track SEEK Message"}
+{: #shareplay-moq-seek-format title="Sync-Track SEEK message"}
 
 
 ### STATUS {#message-status}
@@ -220,7 +220,7 @@ STATUS Message {
   PlaybackState (i),
 }
 ~~~
-{: #shareplay-moq-status-format title="Sync-Track STATUS Message"}
+{: #shareplay-moq-status-format title="Sync-Track STATUS message"}
 
 
 ## Timestamp for Playback Synchronization
@@ -301,7 +301,7 @@ Every client (Leader or Follower) periodically sends a **heartbeat** message to 
 
 1. **Local Playback Time**: The client’s current playback position (e.g., Group ID or time offset (PTS) in the video).
 
-2. **Current Global Time**: The client’s global timestamp, allowing the Relay (and/or Leader) to account for the delay in message transmission.
+2. **Current Global Time**: The client’s global timestamp, allowing the relay (and/or Leader) to account for the delay in message transmission.
 
 
 
@@ -309,7 +309,7 @@ Every client (Leader or Follower) periodically sends a **heartbeat** message to 
 
 
 
-When a new client joins the session, the **first** heartbeat message includes an additional “New-Client-Join” indicator. This allows the Relay (and indirectly the Leader) to:
+When a new client joins the session, the **first** heartbeat message includes an additional “New-Client-Join” indicator. This allows the relay (and indirectly the Leader) to:
 
 - Recognize a new participant in the session.
 
@@ -321,9 +321,9 @@ When a new client joins the session, the **first** heartbeat message includes an
 
 
 
-Each client is expected to send heartbeat messages within a pre-decided interval. If a heartbeat is not received for a duration exceeding that interval (plus some tolerance), the Relay assumes the client has become inactive or disconnected. This triggers either:
+Each client is expected to send heartbeat messages within a pre-decided interval. If a heartbeat is not received for a duration exceeding that interval (plus some tolerance), the relay assumes the client has become inactive or disconnected. This triggers either:
 
-- **Temporary Removal**: The Relay marks the client as “inactive” but does not remove them from the session state immediately.
+- **Temporary Removal**: The relay marks the client as “inactive” but does not remove them from the session state immediately.
 
 - **Full Removal**: If no further heartbeat arrives within a longer grace period, the client is marked as “disconnected” and removed from the synchronized group.
 
@@ -343,7 +343,7 @@ A client may decide to pause or seek independently of the group or otherwise des
 
 2. **Resuming Sync**:
 
-   Once the client is ready to rejoin synchronized playback, it sends a heartbeat with a special “Re-Sync Request” flag or re-subscribes to the Sync-Track. The Leader (or Relay) then supplies the necessary offset or group position so the client can jump to the current playback point and synchronize with others.
+   Once the client is ready to rejoin synchronized playback, it sends a heartbeat with a special “Re-Sync Request” flag or re-subscribes to the Sync-Track. The Leader (or relay) then supplies the necessary offset or group position so the client can jump to the current playback point and synchronize with others.
 
 
 
@@ -355,7 +355,7 @@ Clients experiencing connection issues (e.g., low bandwidth or high latency) can
 
 1. **Adaptive Bitrate (ABR) at the Relay**:
 
-   The Relay can detect from heartbeat messages that a client is consistently behind or losing packets. It may choose to deliver lower-resolution encodings to that specific client (if available) to help it catch up.
+   The relay can detect from heartbeat messages that a client is consistently behind or losing packets. It may choose to deliver lower-resolution encodings to that specific client (if available) to help it catch up.
 
 2. **Lobby Policy: Wait vs. Continue**:
 
