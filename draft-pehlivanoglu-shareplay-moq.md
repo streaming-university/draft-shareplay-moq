@@ -1,7 +1,7 @@
 ---
-title: "Synchronized Social Video-on-Demand (VoD) Viewing with Media over QUIC Transport"
-abbrev: shareplay-moq
-docname: draft-pehlivanoglu-shareplay-moq-latest
+title: "Synchronized Video-on-Demand (VoD) Viewing with Media over QUIC Transport"
+abbrev: moq-shareplay
+docname: draft-pehlivanoglu-moq-shareplay-latest
 date:
   year: 2025
   month: February
@@ -57,7 +57,7 @@ informative:
 
 --- abstract
 
-This draft presents an approach for synchronized social video-on-demand (VoD) viewing with Media over QUIC Transport (MOQT). It extends the current MOQT protocol to enable synchronized VoD functionality. This approach adapts MoQ’s push-content architecture to include interactive features such as pause, resume and seek.
+This draft presents an approach for synchronized video-on-demand (VoD) viewing with Media over QUIC Transport (MOQT). It extends the current MOQT protocol to enable synchronized VoD functionality. This approach adapts MoQ’s push-content architecture to include interactive features such as pause, resume and seek.
 
 --- middle
 
