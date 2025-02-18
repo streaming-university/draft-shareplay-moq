@@ -72,40 +72,49 @@ This document outlines the architectural design, control mechanisms and synchron
 {::boilerplate bcp14-tagged}
 
 Client:
-: An entity that initiates a MOQT session and requests media content.
+: The party initiating a Transport Session.
 
 Server:
-: An entity that accepts incoming MOQT sessions and provides media content.
+: The party accepting an incoming Transport Session.
 
 Endpoint:
-: A Client or Server participating in a MOQT session.
+: A Client or Server.
 
-Producer:
-: An endpoint that publishes media content to a MOQT network.
+Publisher:
+: An endpoint that handles subscriptions by sending
+      requested Objects from the requested track.
 
-Consumer:
-: An endpoint that subscribes to and receives media content from a MOQT network.
+Subscriber:
+: An endpoint that subscribes to and receives tracks.
+
+Original Publisher:
+: The initial publisher of a given track.
 
 Relay:
-: An intermediary node in a MOQT network that forwards media content between Producers and Consumers.
-
-Track:
-: A logical media stream (e.g., video or audio). Tracks contain a sequential series of Groups and serve as the primary subscribable entity in MOQT ({{MoQTransport, Section 2.4}}).
+: An entity that is both a Publisher and a Subscriber, but not
+      the Original Publisher or End Subscriber.
 
 Group:
-: A temporally sequential set of Objects within a Track. A Group provides a synchronization point within a stream ({{MoQTransport, Section 2.3}}).
+: A temporal sequence of objects.  A group represents a join
+      point in a track.  See ({{MoQTransport, Section 2.3}}).
 
 Object:
-: A discrete, addressable unit of media data within a Group. Objects contain media payloads (e.g., video frames or audio samples) ({{MoQTransport, Section 2.1}}).
+: An object is an addressable unit whose payload is a sequence
+      of bytes.  Objects form the base element in the MOQT data model.
+      See ({{MoQTransport, Section 2.1}}).
+      
+Track:
+: An encoded bitstream.  Tracks contain a sequential series of
+      one or more groups and are the subscribable entity with MOQT. See ({{MoQTransport, Section 2.4}}).
 
 Sync-Track:
 : A dedicated track used to synchronize playback across multiple clients by transmitting PLAY, PAUSE and SEEK commands.
 
 Leader Client:
-: The designated control authority within a synchronized playback session. The Leader client issues playback control messages ({{MoQTransport, Section 7}}) that all consumers must follow.
+: The designated control authority within a synchronized playback session. The Leader client issues playback control messages ({{MoQTransport, Section 7}}) that all subscribers must follow.
 
 Follower Client:
-: A consumer that follows playback instructions from the Leader client to maintain synchronization.
+: A subscriber that follows playback instructions from the Leader client to maintain synchronization.
 
 Video-on-Demand (VoD) Session:
 : A session where pre-recorded media is streamed with user-controlled playback features.
