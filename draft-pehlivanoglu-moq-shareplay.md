@@ -111,7 +111,7 @@ Object:
 : An object is an addressable unit whose payload is a sequence
       of bytes.  Objects form the base element in the MOQT data model.
       See ({{MoQTransport, Section 2.1}}).
-      
+
 Track:
 
 : An encoded bitstream.  Tracks contain a sequential series of
