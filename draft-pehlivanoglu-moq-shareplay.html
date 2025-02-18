@@ -1313,67 +1313,78 @@ appear in all capitals, as shown here.<a href="#section-1.1-1" class="pilcrow">�
 <span class="break"></span><dl class="dlParallel" id="section-1.1-2">
           <dt id="section-1.1-2.1">Client:</dt>
           <dd style="margin-left: 1.5em" id="section-1.1-2.2">
-            <p id="section-1.1-2.2.1">An entity that initiates a MOQT session and requests media content.<a href="#section-1.1-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-2.2.1">The party initiating a Transport Session.<a href="#section-1.1-2.2.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 <dt id="section-1.1-2.3">Server:</dt>
           <dd style="margin-left: 1.5em" id="section-1.1-2.4">
-            <p id="section-1.1-2.4.1">An entity that accepts incoming MOQT sessions and provides media content.<a href="#section-1.1-2.4.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-2.4.1">The party accepting an incoming Transport Session.<a href="#section-1.1-2.4.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 <dt id="section-1.1-2.5">Endpoint:</dt>
           <dd style="margin-left: 1.5em" id="section-1.1-2.6">
-            <p id="section-1.1-2.6.1">A Client or Server participating in a MOQT session.<a href="#section-1.1-2.6.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-2.6.1">A Client or Server.<a href="#section-1.1-2.6.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="section-1.1-2.7">Producer:</dt>
+<dt id="section-1.1-2.7">Publisher:</dt>
           <dd style="margin-left: 1.5em" id="section-1.1-2.8">
-            <p id="section-1.1-2.8.1">An endpoint that publishes media content to a MOQT network.<a href="#section-1.1-2.8.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-2.8.1">An endpoint that handles subscriptions by sending
+    requested Objects from the requested track.<a href="#section-1.1-2.8.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="section-1.1-2.9">Consumer:</dt>
+<dt id="section-1.1-2.9">Subscriber:</dt>
           <dd style="margin-left: 1.5em" id="section-1.1-2.10">
-            <p id="section-1.1-2.10.1">An endpoint that subscribes to and receives media content from a MOQT network.<a href="#section-1.1-2.10.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-2.10.1">An endpoint that subscribes to and receives tracks.<a href="#section-1.1-2.10.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="section-1.1-2.11">Relay:</dt>
+<dt id="section-1.1-2.11">Original Publisher:</dt>
           <dd style="margin-left: 1.5em" id="section-1.1-2.12">
-            <p id="section-1.1-2.12.1">An intermediary node in a MOQT network that forwards media content between Producers and Consumers.<a href="#section-1.1-2.12.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-2.12.1">The initial publisher of a given track.<a href="#section-1.1-2.12.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="section-1.1-2.13">Track:</dt>
+<dt id="section-1.1-2.13">Relay:</dt>
           <dd style="margin-left: 1.5em" id="section-1.1-2.14">
-            <p id="section-1.1-2.14.1">A logical media stream (e.g., video or audio). Tracks contain a sequential series of Groups and serve as the primary subscribable entity in MOQT (<span>[<a href="#MoQTransport" class="cite xref">MoQTransport</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-08#section-2.4" class="relref">Section 2.4</a></span>).<a href="#section-1.1-2.14.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-2.14.1">An entity that is both a Publisher and a Subscriber, but not
+    the Original Publisher or End Subscriber.<a href="#section-1.1-2.14.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 <dt id="section-1.1-2.15">Group:</dt>
           <dd style="margin-left: 1.5em" id="section-1.1-2.16">
-            <p id="section-1.1-2.16.1">A temporally sequential set of Objects within a Track. A Group provides a synchronization point within a stream (<span>[<a href="#MoQTransport" class="cite xref">MoQTransport</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-08#section-2.3" class="relref">Section 2.3</a></span>).<a href="#section-1.1-2.16.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-2.16.1">A temporal sequence of objects.  A group represents a join
+    point in a track.  See (<span>[<a href="#MoQTransport" class="cite xref">MoQTransport</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-08#section-2.3" class="relref">Section 2.3</a></span>).<a href="#section-1.1-2.16.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 <dt id="section-1.1-2.17">Object:</dt>
           <dd style="margin-left: 1.5em" id="section-1.1-2.18">
-            <p id="section-1.1-2.18.1">A discrete, addressable unit of media data within a Group. Objects contain media payloads (e.g., video frames or audio samples) (<span>[<a href="#MoQTransport" class="cite xref">MoQTransport</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-08#section-2.1" class="relref">Section 2.1</a></span>).<a href="#section-1.1-2.18.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-2.18.1">An object is an addressable unit whose payload is a sequence
+    of bytes.  Objects form the base element in the MOQT data model.
+    See (<span>[<a href="#MoQTransport" class="cite xref">MoQTransport</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-08#section-2.1" class="relref">Section 2.1</a></span>).<a href="#section-1.1-2.18.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="section-1.1-2.19">Sync-Track:</dt>
+<dt id="section-1.1-2.19">Track:</dt>
           <dd style="margin-left: 1.5em" id="section-1.1-2.20">
-            <p id="section-1.1-2.20.1">A dedicated track used to synchronize playback across multiple clients by transmitting PLAY, PAUSE and SEEK commands.<a href="#section-1.1-2.20.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-2.20.1">An encoded bitstream.  Tracks contain a sequential series of
+    one or more groups and are the subscribable entity with MOQT. See (<span>[<a href="#MoQTransport" class="cite xref">MoQTransport</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-08#section-2.4" class="relref">Section 2.4</a></span>).<a href="#section-1.1-2.20.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="section-1.1-2.21">Leader Client:</dt>
+<dt id="section-1.1-2.21">Sync-Track:</dt>
           <dd style="margin-left: 1.5em" id="section-1.1-2.22">
-            <p id="section-1.1-2.22.1">The designated control authority within a synchronized playback session. The Leader client issues playback control messages (<span>[<a href="#MoQTransport" class="cite xref">MoQTransport</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-08#section-7" class="relref">Section 7</a></span>) that all consumers must follow.<a href="#section-1.1-2.22.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-2.22.1">A dedicated track used to synchronize playback across multiple clients by transmitting PLAY, PAUSE and SEEK commands.<a href="#section-1.1-2.22.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="section-1.1-2.23">Follower Client:</dt>
+<dt id="section-1.1-2.23">Leader Client:</dt>
           <dd style="margin-left: 1.5em" id="section-1.1-2.24">
-            <p id="section-1.1-2.24.1">A consumer that follows playback instructions from the Leader client to maintain synchronization.<a href="#section-1.1-2.24.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-2.24.1">The designated control authority within a synchronized playback session. The Leader client issues playback control messages (<span>[<a href="#MoQTransport" class="cite xref">MoQTransport</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-08#section-7" class="relref">Section 7</a></span>) that all subscribers must follow.<a href="#section-1.1-2.24.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="section-1.1-2.25">Video-on-Demand (VoD) Session:</dt>
+<dt id="section-1.1-2.25">Follower Client:</dt>
           <dd style="margin-left: 1.5em" id="section-1.1-2.26">
-            <p id="section-1.1-2.26.1">A session where pre-recorded media is streamed with user-controlled playback features.<a href="#section-1.1-2.26.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-2.26.1">A subscriber that follows playback instructions from the Leader client to maintain synchronization.<a href="#section-1.1-2.26.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.1-2.27">Video-on-Demand (VoD) Session:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.28">
+            <p id="section-1.1-2.28.1">A session where pre-recorded media is streamed with user-controlled playback features.<a href="#section-1.1-2.28.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 </dl>
@@ -1417,9 +1428,9 @@ encoding as described in (<span>[<a href="#RFC9000" class="cite xref">RFC9000</a
         <h3 id="name-playback-control-mechanisms">
 <a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-playback-control-mechanisms" class="section-name selfRef">Playback Control Mechanisms</a>
         </h3>
-<p id="section-2.1-1">Playback is initiated by sending a SUBSCRIBE (<span>[<a href="#MoQTransport" class="cite xref">MoQTransport</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-08#section-7.4" class="relref">Section 7.4</a></span>) control message for the desired media track. The SUBSCRIBE message specifies the track namespace, track name and a filter type (e.g., Latest Group or Absolute Start) to determine the starting point of the media delivery. Pausing playback is accomplished by sending a specific PAUSE message with its corresponding Group ID via Sync-Track. This stops the publisher from sending further objects for the specified track. To resume playback, the client issues a PLAY message again via Sync-Track. In the case of staying inactive for an extended period of time, the client will be unsubscribed automatically via MOQT's UNSUBSCRIBE (<span>[<a href="#MoQTransport" class="cite xref">MoQTransport</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-08#section-7.6" class="relref">Section 7.6</a></span>). To start the playback again, the client sends a SUBSCRIBE message.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
-<p id="section-2.1-2">Seeking to a specific position within a track is supported using the SEEK message via Sync-Track, with the corresponding Group ID. This allows the client to request media starting from a specific group and continuing in a push-content fashion. However, this functionality requires that the publisher supports the ability to serve media from arbitrary positions within the track, which may not be universally available in all implementations. This is discussed in Section 4 in detail.<a href="#section-2.1-2" class="pilcrow">¶</a></p>
-<p id="section-2.1-3">This document introduces new Sync-Track messages, which can only be sent by the Leader client. When the Leader client sends these messages, a compatible publisher will respond by playing, pausing or seeking as instructed. Upon receiving a PAUSE command, the publisher halts broadcasting at the specified Group ID, freezing playback until a PLAY command resumes it from the paused position. A SEEK command directs the publisher to calculate the frame corresponding to the provided Group ID and restart broadcasting from that frame. This mechanism ensures all subscribers remain synchronized, allowing them to watch the stream simultaneously from the adjusted playback point.<a href="#section-2.1-3" class="pilcrow">¶</a></p>
+<p id="section-2.1-1">Playback is initiated by sending a SUBSCRIBE (<span>[<a href="#MoQTransport" class="cite xref">MoQTransport</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-08#section-7.4" class="relref">Section 7.4</a></span>) control message for the desired media track. The SUBSCRIBE message specifies the track namespace, track name and a filter type (e.g., Latest Group or Absolute Start) to determine the starting point of the media delivery. Pausing playback is accomplished by sending a specific PAUSE message with its corresponding Group ID via Sync-Track. This stops the original publisher from sending further objects for the specified track. To resume playback, the client issues a PLAY message again via Sync-Track. In the case of staying inactive for an extended period of time, the client will be unsubscribed automatically via MOQT's UNSUBSCRIBE (<span>[<a href="#MoQTransport" class="cite xref">MoQTransport</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-08#section-7.6" class="relref">Section 7.6</a></span>). To start the playback again, the client sends a SUBSCRIBE message.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
+<p id="section-2.1-2">Seeking to a specific position within a track is supported using the SEEK message via Sync-Track, with the corresponding Group ID. This allows the client to request media starting from a specific group and continuing in a push-content fashion. However, this functionality requires that the original publisher supports the ability to serve media from arbitrary positions within the track, which may not be universally available in all implementations. This is discussed in Section 4 in detail.<a href="#section-2.1-2" class="pilcrow">¶</a></p>
+<p id="section-2.1-3">This document introduces new Sync-Track messages, which can only be sent by the Leader client. When the Leader client sends these messages, a compatible publisher will respond by playing, pausing or seeking as instructed. Upon receiving a PAUSE command, the original publisher halts broadcasting at the specified Group ID, freezing playback until a PLAY command resumes it from the paused position. A SEEK command directs the original publisher to calculate the frame corresponding to the provided Group ID and restart broadcasting from that frame. This mechanism ensures all subscribers remain synchronized, allowing them to watch the stream simultaneously from the adjusted playback point.<a href="#section-2.1-3" class="pilcrow">¶</a></p>
 <div id="decoupling-seek-from-playpause">
 <section id="section-2.1.1">
           <h4 id="name-decoupling-seek-from-play-p">
@@ -1579,7 +1590,7 @@ STATUS Message {
         <h3 id="name-timestamp-for-playback-sync">
 <a href="#section-2.3" class="section-number selfRef">2.3. </a><a href="#name-timestamp-for-playback-sync" class="section-name selfRef">Timestamp for Playback Synchronization</a>
         </h3>
-<p id="section-2.3-1">Each Sync-Track control message (PLAY, PAUSE, SEEK) contains a timestamp field, which represents the intended media position when the action is triggered. This timestamp ensures that playback actions (especially SEEK) are synchronized across clients, preventing head-of-line blocking due to out-of-order commands. The publisher uses this timestamp to adjust the playback position accordingly.<a href="#section-2.3-1" class="pilcrow">¶</a></p>
+<p id="section-2.3-1">Each Sync-Track control message (PLAY, PAUSE, SEEK) contains a timestamp field, which represents the intended media position when the action is triggered. This timestamp ensures that playback actions (especially SEEK) are synchronized across clients, preventing head-of-line blocking due to out-of-order commands. The original publisher uses this timestamp to adjust the playback position accordingly.<a href="#section-2.3-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="grouping-of-playback-control-messages">
@@ -1595,7 +1606,7 @@ STATUS Message {
         <h3 id="name-playback-status">
 <a href="#section-2.5" class="section-number selfRef">2.5. </a><a href="#name-playback-status" class="section-name selfRef">Playback Status</a>
         </h3>
-<p id="section-2.5-1">To achieve better synchronization, a new status reporting message is introduced. This stream carries periodic updates from the publisher, indicating the current playback position, current PlaybackState (Playing/Paused), and last acknowledged seek position. Clients can subscribe to this stream to get notified of every playback state change.<a href="#section-2.5-1" class="pilcrow">¶</a></p>
+<p id="section-2.5-1">To achieve better synchronization, a new status reporting message is introduced. This stream carries periodic updates from the original publisher, indicating the current playback position, current PlaybackState (Playing/Paused), and last acknowledged seek position. Clients can subscribe to this stream to get notified of every playback state change.<a href="#section-2.5-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="playback-message-flow">
@@ -1608,7 +1619,7 @@ STATUS Message {
 <figure id="figure-6">
           <div class="alignLeft art-text artwork" id="section-2.6-2.1">
 <pre>
-Leader Client             Relay Server(s)               Publisher   Follower Clients
+Leader Client             Relay Server(s)          Original Publisher   Follower Clients
      |                          |                          |               |
      |---------- PLAY ---------&gt;|                          |               |
      |                          |---------- PLAY ---------&gt;|               |
@@ -1712,7 +1723,7 @@ Relay servers <span class="bcp14">MUST</span> discard such messages if received 
         <h3 id="name-heartbeat-messages">
 <a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-heartbeat-messages" class="section-name selfRef">Heartbeat Messages</a>
         </h3>
-<p id="section-4.1-1">Every client (Leader or Follower) periodically sends a <strong>heartbeat</strong> message to the relay (or publisher, depending on implementation). The relay aggregates these messages to maintain an up-to-date view of each client’s playback status and connectivity. A heartbeat message contains at least:<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.1-1">Every client (Leader or Follower) periodically sends a <strong>heartbeat</strong> message to the relay (or or the original publisher, depending on implementation). The relay aggregates these messages to maintain an up-to-date view of each client’s playback status and connectivity. A heartbeat message contains at least:<a href="#section-4.1-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-4.1-2">
 <li id="section-4.1-2.1">
             <p id="section-4.1-2.1.1"><strong>Local Playback Time</strong>: The client’s current playback position (e.g., Group ID or time offset (PTS) in the video).<a href="#section-4.1-2.1.1" class="pilcrow">¶</a></p>
@@ -1914,7 +1925,7 @@ An initial session-level policy can determine if the group is willing to wait fo
 <span class="break"></span><dl class="dlParallel" id="appendix-A.2-1">
           <dt id="appendix-A.2-1.1">Storage Integration:</dt>
           <dd style="margin-left: 1.5em" id="appendix-A.2-1.2">
-            <p id="appendix-A.2-1.2.1">Stream archived fMP4 content directly from publishers local storage, eliminating the need for real-time transcoding.<a href="#appendix-A.2-1.2.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.2-1.2.1">Stream archived fMP4 content directly from original publisher's local storage, eliminating the need for real-time transcoding.<a href="#appendix-A.2-1.2.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 <dt id="appendix-A.2-1.3">Efficient Retrieval of Media:</dt>
@@ -1941,7 +1952,7 @@ An initial session-level policy can determine if the group is willing to wait fo
           <dd style="margin-left: 1.5em" id="appendix-A.3-1.4">
             <p id="appendix-A.3-1.4.1">Each moof+mdat pair corresponds to a frame in the H.264 stream. A group of frames form a Group of Pictures (GOP). A GOP begins with an intra-coded frame (I-frame), followed by predictively-encoded frames (P/B-frames).
 The <code>Group ID</code> parameter in MOQT aligns with the GOP index in H.264. This ensures that seeking to a specific <code>Group ID</code> starts playback from the I-frame at the beginning of the requested GOP, enabling correct decoder initialization.
-Publisher maintains an internal index mapping <code>Group ID</code> to the byte offset of the corresponding GOP’s moof+mdat pair.<a href="#appendix-A.3-1.4.1" class="pilcrow">¶</a></p>
+The original publisher maintains an internal index mapping <code>Group ID</code> to the byte offset of the corresponding GOP’s moof+mdat pair.<a href="#appendix-A.3-1.4.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 </dl>
@@ -1955,7 +1966,7 @@ Publisher maintains an internal index mapping <code>Group ID</code> to the byte 
             <dd style="margin-left: 1.5em" id="appendix-A.3.1-1.2">
               <ol start="1" type="1" class="normal type-1" id="appendix-A.3.1-1.2.1">
 <li id="appendix-A.3.1-1.2.1.1">
-                  <p id="appendix-A.3.1-1.2.1.1.1">The publisher transmits the <code>ftyp</code> and <code>moov</code> atoms as an initialization segment.<a href="#appendix-A.3.1-1.2.1.1.1" class="pilcrow">¶</a></p>
+                  <p id="appendix-A.3.1-1.2.1.1.1">The original publisher transmits the <code>ftyp</code> and <code>moov</code> atoms as an initialization segment.<a href="#appendix-A.3.1-1.2.1.1.1" class="pilcrow">¶</a></p>
 </li>
                 <li id="appendix-A.3.1-1.2.1.2">
                   <p id="appendix-A.3.1-1.2.1.2.1">Subsequent objects (moof+mdat pairs) are transmitted incrementally, adhering to the subscriber’s playback state.<a href="#appendix-A.3.1-1.2.1.2.1" class="pilcrow">¶</a></p>
@@ -1973,7 +1984,7 @@ Publisher maintains an internal index mapping <code>Group ID</code> to the byte 
         <h3 id="name-dynamic-playback-control">
 <a href="#appendix-A.4" class="section-number selfRef">A.4. </a><a href="#name-dynamic-playback-control" class="section-name selfRef">Dynamic Playback Control</a>
         </h3>
-<p id="appendix-A.4-1">The publisher asynchronously monitors a dedicated <code>Sync-Track</code> for control messages (e.g., <code>PLAY</code>, <code>PAUSE</code>, <code>SEEK</code>) issued by the <em>Leader Client</em>.<a href="#appendix-A.4-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.4-1">The original publisher asynchronously monitors a dedicated <code>Sync-Track</code> for control messages (e.g., <code>PLAY</code>, <code>PAUSE</code>, <code>SEEK</code>) issued by the <em>Leader Client</em>.<a href="#appendix-A.4-1" class="pilcrow">¶</a></p>
 <div id="command-processing">
 <section id="appendix-A.4.1">
           <h4 id="name-command-processing">
@@ -1984,7 +1995,7 @@ Publisher maintains an internal index mapping <code>Group ID</code> to the byte 
             <dd style="margin-left: 1.5em" id="appendix-A.4.1-1.2">
               <ol start="1" type="1" class="normal type-1" id="appendix-A.4.1-1.2.1">
 <li id="appendix-A.4.1-1.2.1.1">
-                  <p id="appendix-A.4.1-1.2.1.1.1">The publisher identifies the start of the nearest GOP boundary for the requested <code>Group ID</code>, and resumes publishing from the corresponding frame.<a href="#appendix-A.4.1-1.2.1.1.1" class="pilcrow">¶</a></p>
+                  <p id="appendix-A.4.1-1.2.1.1.1">The original publisher identifies the start of the nearest GOP boundary for the requested <code>Group ID</code>, and resumes publishing from the corresponding frame.<a href="#appendix-A.4.1-1.2.1.1.1" class="pilcrow">¶</a></p>
 </li>
                 <li id="appendix-A.4.1-1.2.1.2">
                   <p id="appendix-A.4.1-1.2.1.2.1">Streaming resumes from the start of the GOP containing the target I-frame, ensuring all dependent P/B-frames are included for seamless decoding.<a href="#appendix-A.4.1-1.2.1.2.1" class="pilcrow">¶</a></p>
