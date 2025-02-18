@@ -5,10 +5,10 @@
 MOQ                                                      A. Pehlivanoglu
 Internet-Draft                                                 K. Bekmez
 Intended status: Informational                          B. Yumakogullari
-Expires: 21 August 2025                                         Z. Gurel
+Expires: 22 August 2025                                         Z. Gurel
                                                                 A. Begen
                                                       Ozyegin University
-                                                        17 February 2025
+                                                        18 February 2025
 
 
     Synchronized Video-on-Demand (VoD) Viewing with Media over QUIC
@@ -38,7 +38,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 21 August 2025.
+   This Internet-Draft will expire on 22 August 2025.
 
 Copyright Notice
 
@@ -98,7 +98,7 @@ Table of Contents
 
 1.  Introduction
 
-   Media Over QUIC Transport (MOQT) is a novel protocol designed for
+   Media over QUIC Transport (MOQT) is a novel protocol designed for
    efficient media streaming over the QUIC transport protocol
    ([RFC9000]).  While MOQT has shown promise for live-edge streaming,
    its current design lacks support for essential VoD functionalities,
@@ -183,7 +183,7 @@ Table of Contents
 2.  Synchronized Playback Control
 
    The MOQT protocol does not explicitly define dedicated control
-   messages for play, pause or seek operations.  Instead, these
+   messages for PLAY, PAUSE or SEEK operations.  Instead, these
    functionalities are achieved through subscription-based messaging.
 
 2.1.  Playback Control Mechanisms
@@ -381,8 +381,8 @@ Leader Client             Relay Server(s)               Publisher   Follower Cli
    The Leader-Follower client model is a subscriber coordination
    mechanism designed to enforce synchronized media playback across
    multiple clients.  This model ensures deterministic control over
-   playback operations (e.g., play, pause, seek) to prevent conflicting
-   actions and maintain synchronization.
+   playback operations to prevent conflicting actions and maintain
+   synchronization.
 
 3.1.  Role Assignment
 
