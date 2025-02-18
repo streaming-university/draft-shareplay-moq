@@ -72,51 +72,65 @@ This document outlines the architectural design, control mechanisms and synchron
 {::boilerplate bcp14-tagged}
 
 Client:
+
 : The party initiating a Transport Session.
 
 Server:
+
 : The party accepting an incoming Transport Session.
 
 Endpoint:
+
 : A Client or Server.
 
 Publisher:
+
 : An endpoint that handles subscriptions by sending
       requested Objects from the requested track.
 
 Subscriber:
+
 : An endpoint that subscribes to and receives tracks.
 
 Original Publisher:
+
 : The initial publisher of a given track.
 
 Relay:
+
 : An entity that is both a Publisher and a Subscriber, but not
       the Original Publisher or End Subscriber.
 
 Group:
+
 : A temporal sequence of objects.  A group represents a join
       point in a track.  See ({{MoQTransport, Section 2.3}}).
 
 Object:
+
 : An object is an addressable unit whose payload is a sequence
       of bytes.  Objects form the base element in the MOQT data model.
       See ({{MoQTransport, Section 2.1}}).
       
 Track:
+
 : An encoded bitstream.  Tracks contain a sequential series of
       one or more groups and are the subscribable entity with MOQT. See ({{MoQTransport, Section 2.4}}).
 
 Sync-Track:
+
 : A dedicated track used to synchronize playback across multiple clients by transmitting PLAY, PAUSE and SEEK commands.
 
 Leader Client:
+
 : The designated control authority within a synchronized playback session. The Leader client issues playback control messages ({{MoQTransport, Section 7}}) that all subscribers must follow.
 
 Follower Client:
+
 : A subscriber that follows playback instructions from the Leader client to maintain synchronization.
 
 Video-on-Demand (VoD) Session:
+
 : A session where pre-recorded media is streamed with user-controlled playback features.
 
 ## Notational Conventions
@@ -143,11 +157,11 @@ The MOQT protocol does not explicitly define dedicated control messages for PLAY
 
 ## Playback Control Mechanisms
 
-Playback is initiated by sending a SUBSCRIBE ({{MoQTransport, Section 7.4}}) control message for the desired media track. The SUBSCRIBE message specifies the track namespace, track name and a filter type (e.g., Latest Group or Absolute Start) to determine the starting point of the media delivery. Pausing playback is accomplished by sending a specific PAUSE message with its corresponding Group ID via Sync-Track. This stops the publisher from sending further objects for the specified track. To resume playback, the client issues a PLAY message again via Sync-Track. In the case of staying inactive for an extended period of time, the client will be unsubscribed automatically via MOQT's UNSUBSCRIBE ({{MoQTransport, Section 7.6}}). To start the playback again, the client sends a SUBSCRIBE message.
+Playback is initiated by sending a SUBSCRIBE ({{MoQTransport, Section 7.4}}) control message for the desired media track. The SUBSCRIBE message specifies the track namespace, track name and a filter type (e.g., Latest Group or Absolute Start) to determine the starting point of the media delivery. Pausing playback is accomplished by sending a specific PAUSE message with its corresponding Group ID via Sync-Track. This stops the original publisher from sending further objects for the specified track. To resume playback, the client issues a PLAY message again via Sync-Track. In the case of staying inactive for an extended period of time, the client will be unsubscribed automatically via MOQT's UNSUBSCRIBE ({{MoQTransport, Section 7.6}}). To start the playback again, the client sends a SUBSCRIBE message.
 
-Seeking to a specific position within a track is supported using the SEEK message via Sync-Track, with the corresponding Group ID. This allows the client to request media starting from a specific group and continuing in a push-content fashion. However, this functionality requires that the publisher supports the ability to serve media from arbitrary positions within the track, which may not be universally available in all implementations. This is discussed in Section 4 in detail.
+Seeking to a specific position within a track is supported using the SEEK message via Sync-Track, with the corresponding Group ID. This allows the client to request media starting from a specific group and continuing in a push-content fashion. However, this functionality requires that the original publisher supports the ability to serve media from arbitrary positions within the track, which may not be universally available in all implementations. This is discussed in Section 4 in detail.
 
-This document introduces new Sync-Track messages, which can only be sent by the Leader client. When the Leader client sends these messages, a compatible publisher will respond by playing, pausing or seeking as instructed. Upon receiving a PAUSE command, the publisher halts broadcasting at the specified Group ID, freezing playback until a PLAY command resumes it from the paused position. A SEEK command directs the publisher to calculate the frame corresponding to the provided Group ID and restart broadcasting from that frame. This mechanism ensures all subscribers remain synchronized, allowing them to watch the stream simultaneously from the adjusted playback point.
+This document introduces new Sync-Track messages, which can only be sent by the Leader client. When the Leader client sends these messages, a compatible publisher will respond by playing, pausing or seeking as instructed. Upon receiving a PAUSE command, the original publisher halts broadcasting at the specified Group ID, freezing playback until a PLAY command resumes it from the paused position. A SEEK command directs the original publisher to calculate the frame corresponding to the provided Group ID and restart broadcasting from that frame. This mechanism ensures all subscribers remain synchronized, allowing them to watch the stream simultaneously from the adjusted playback point.
 
 ### Decoupling Seek from Play/Pause
 
@@ -233,19 +247,19 @@ STATUS Message {
 
 
 ## Timestamp for Playback Synchronization
-Each Sync-Track control message (PLAY, PAUSE, SEEK) contains a timestamp field, which represents the intended media position when the action is triggered. This timestamp ensures that playback actions (especially SEEK) are synchronized across clients, preventing head-of-line blocking due to out-of-order commands. The publisher uses this timestamp to adjust the playback position accordingly.
+Each Sync-Track control message (PLAY, PAUSE, SEEK) contains a timestamp field, which represents the intended media position when the action is triggered. This timestamp ensures that playback actions (especially SEEK) are synchronized across clients, preventing head-of-line blocking due to out-of-order commands. The original publisher uses this timestamp to adjust the playback position accordingly.
 
 ## Grouping of Playback Control Messages
 The PLAY and PAUSE commands must be treated as dependent operations and thus belong to the same control subgroup. However, SEEK operates independently and belongs to a separate subgroup. This separation ensures that PLAY/PAUSE messages are processed sequentially within their stream, while the SEEK commands are handled in a separate stream to avoid blocking the playback state transitions.
 
 ## Playback Status
-To achieve better synchronization, a new status reporting message is introduced. This stream carries periodic updates from the publisher, indicating the current playback position, current PlaybackState (Playing/Paused), and last acknowledged seek position. Clients can subscribe to this stream to get notified of every playback state change.
+To achieve better synchronization, a new status reporting message is introduced. This stream carries periodic updates from the original publisher, indicating the current playback position, current PlaybackState (Playing/Paused), and last acknowledged seek position. Clients can subscribe to this stream to get notified of every playback state change.
 
 ## Playback Message Flow
 The following message flow illustrates how the playback operations (PLAY, PAUSE and SEEK) are used through the relay servers, thus enabling clients to stay in a synchronized playback.
 
 ~~~
-Leader Client             Relay Server(s)               Publisher   Follower Clients
+Leader Client             Relay Server(s)          Original Publisher   Follower Clients
      |                          |                          |               |
      |---------- PLAY --------->|                          |               |
      |                          |---------- PLAY --------->|               |
@@ -306,17 +320,14 @@ This section defines a “heartbeat” mechanism and outlines how clients can jo
 
 ## Heartbeat Messages
 
-Every client (Leader or Follower) periodically sends a **heartbeat** message to the relay (or publisher, depending on implementation). The relay aggregates these messages to maintain an up-to-date view of each client’s playback status and connectivity. A heartbeat message contains at least:
+Every client (Leader or Follower) periodically sends a **heartbeat** message to the relay (or or the original publisher, depending on implementation). The relay aggregates these messages to maintain an up-to-date view of each client’s playback status and connectivity. A heartbeat message contains at least:
 
 1. **Local Playback Time**: The client’s current playback position (e.g., Group ID or time offset (PTS) in the video).
 
 2. **Current Global Time**: The client’s global timestamp, allowing the relay (and/or Leader) to account for the delay in message transmission.
 
 
-
 ### New Client Announcement
-
-
 
 When a new client joins the session, the **first** heartbeat message includes an additional “New-Client-Join” indicator. This allows the relay (and indirectly the Leader) to:
 
@@ -324,11 +335,7 @@ When a new client joins the session, the **first** heartbeat message includes an
 
 - Potentially notify other participants (if needed).
 
-
-
 ### Heartbeat Timeouts and Disconnections
-
-
 
 Each client is expected to send heartbeat messages within a pre-decided interval. If a heartbeat is not received for a duration exceeding that interval (plus some tolerance), the relay assumes the client has become inactive or disconnected. This triggers either:
 
@@ -337,14 +344,9 @@ Each client is expected to send heartbeat messages within a pre-decided interval
 - **Full Removal**: If no further heartbeat arrives within a longer grace period, the client is marked as “disconnected” and removed from the synchronized group.
 
 
-
 ## Out of Sync and Re-Syncing
 
-
-
 A client may decide to pause or seek independently of the group or otherwise desynchronize its playback. For instance, a user might rewind to re-watch a scene without causing the entire group to follow. Such actions are handled as follows:
-
-
 
 1. **Local-Only Rewind/Seek**:
 
@@ -355,10 +357,7 @@ A client may decide to pause or seek independently of the group or otherwise des
    Once the client is ready to rejoin synchronized playback, it sends a heartbeat with a special “Re-Sync Request” flag or re-subscribes to the Sync-Track. The Leader (or relay) then supplies the necessary offset or group position so the client can jump to the current playback point and synchronize with others.
 
 
-
 ## Handling Network Issues and Group Policy
-
-
 
 Clients experiencing connection issues (e.g., low bandwidth or high latency) can degrade the overall group experience if every other client must wait. To mitigate this:
 
@@ -371,10 +370,7 @@ Clients experiencing connection issues (e.g., low bandwidth or high latency) can
    An initial session-level policy can determine if the group is willing to wait for slow clients or not. If the policy is set to “continue,” the lagging client might partially skip forward (or remain unsynchronized) until network conditions improve. If the policy is set to “wait,” the group collectively applies additional buffering or pause states to allow the slow client to keep up.
 
 
-
 ## Fetch-Based Architecture
-
-
 
 The current design builds on MOQ’s push-based content delivery. The current revision introduces a more scalable, fetch-oriented mechanism for client synchronization. This approach will further refine:
 
@@ -413,7 +409,7 @@ Initialization Segments:
 
 ## Publisher (`moq-pub`) Responsibilities
 Storage Integration:
-: Stream archived fMP4 content directly from publishers local storage, eliminating the need for real-time transcoding.
+: Stream archived fMP4 content directly from original publisher's local storage, eliminating the need for real-time transcoding.
 
 Efficient Retrieval of Media:
 : Support arbitrary access to media fragments (moof+mdat pairs) for low-latency seek operations.
@@ -428,19 +424,19 @@ Atomic Units:
 Group Mapping:
 : Each moof+mdat pair corresponds to a frame in the H.264 stream. A group of frames form a Group of Pictures (GOP). A GOP begins with an intra-coded frame (I-frame), followed by predictively-encoded frames (P/B-frames).
 The `Group ID` parameter in MOQT aligns with the GOP index in H.264. This ensures that seeking to a specific `Group ID` starts playback from the I-frame at the beginning of the requested GOP, enabling correct decoder initialization.
-Publisher maintains an internal index mapping `Group ID` to the byte offset of the corresponding GOP’s moof+mdat pair.
+The original publisher maintains an internal index mapping `Group ID` to the byte offset of the corresponding GOP’s moof+mdat pair.
 
 ### Session Initialization
 At the start of a streaming session:
-: 1. The publisher transmits the `ftyp` and `moov` atoms as an initialization segment.
+: 1. The original publisher transmits the `ftyp` and `moov` atoms as an initialization segment.
 2. Subsequent objects (moof+mdat pairs) are transmitted incrementally, adhering to the subscriber’s playback state.
 
 ## Dynamic Playback Control
-The publisher asynchronously monitors a dedicated `Sync-Track` for control messages (e.g., `PLAY`, `PAUSE`, `SEEK`) issued by the *Leader Client*.
+The original publisher asynchronously monitors a dedicated `Sync-Track` for control messages (e.g., `PLAY`, `PAUSE`, `SEEK`) issued by the *Leader Client*.
 
 ### Command Processing
 Seek Operations: On receiving a `SEEK` command:
-: 1. The publisher identifies the start of the nearest GOP boundary for the requested `Group ID`, and resumes publishing from the corresponding frame.
+: 1. The original publisher identifies the start of the nearest GOP boundary for the requested `Group ID`, and resumes publishing from the corresponding frame.
   2. Streaming resumes from the start of the GOP containing the target I-frame, ensuring all dependent P/B-frames are included for seamless decoding.
   3. Subscribers receive the full GOP sequence, eliminating decoder errors caused by missing reference frames.
 Pause/Resume:
