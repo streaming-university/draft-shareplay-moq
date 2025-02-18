@@ -1,0 +1,2078 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>Synchronized Video-on-Demand (VoD) Viewing with Media over QUIC Transport</title>
+<meta content="Ahmet Pehlivanoglu" name="author">
+<meta content="Kerem Bekmez" name="author">
+<meta content="Basar Yumakogullari" name="author">
+<meta content="Zafer Gurel" name="author">
+<meta content="Ali Begen" name="author">
+<meta content="
+       This draft presents an approach for synchronized video-on-demand (VoD) viewing with Media over QUIC Transport (MOQT). It extends the current MOQT protocol to enable synchronized VoD functionality. This approach adapts MOQ’s push-content architecture to include interactive features such as pause, resume and seek. 
+    " name="description">
+<meta content="xml2rfc 3.27.0" name="generator">
+<meta content="Internet-Draft" name="keyword">
+<meta content="draft-pehlivanoglu-moq-shareplay-latest" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.27.0
+    Python 3.12.9
+    ConfigArgParse 1.7
+    google-i18n-address 3.1.1
+    intervaltree 3.1.0
+    Jinja2 3.1.5
+    lxml 5.3.0
+    platformdirs 4.3.6
+    pycountry 24.6.1
+    PyYAML 6.0.2
+    requests 2.32.3
+    setuptools 70.3.0
+    wcwidth 0.2.13
+-->
+<link href="draft-pehlivanoglu-moq-shareplay.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Lora SemiBold'), local('Lora-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: light dark;
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
+  --small-font-size: 14.5px;
+  --font-mono: 'Oxygen Mono', monospace;
+  --font-title: "Sofia Sans Semi Condensed", sans-serif;
+  scrollbar-color: #bbb #eee;
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+section {
+  clear: both;
+}
+.section-number {
+  padding-right: 0.5em;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  font-weight: 680;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+h1#title {
+  font-size: 32px;
+  line-height: 40px;
+  clear: both;
+}
+h1#title, h1#rfcnum {
+  margin: 1.5em 0 0.2em;
+}
+h1#rfcnum + h1#title {
+  margin: 0.2em 0;
+}
+
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 27px;
+}
+h4, h5, h6 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+#abstract+p {
+  font-size: 18px;
+  line-height: 24px;
+}
+#abstract+p code, #abstract+p samp, #abstract+p tt {
+  font-size: 16px;
+  line-height: 0;
+}
+
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+/* font-family isn't space-separated, but =~ will have to do */
+svg[font-family~="monospace" i], svg [font-family~="monospace" i] {
+  font-family: var(--font-mono);
+}
+.alignCenter.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  border: none;
+  /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+     support flexbox yet.
+  */
+  display: table;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 0.5em 2em;
+  & :is(ol, ul) {
+    margin-left: 1em;
+  }
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+  & li {
+    margin-top: 0.5em;
+  }
+}
+:is(ul, ol).compact, .ulCompact, .olCompact {
+  margin: 0 0 0 2em;
+  & li {
+    margin: 0;
+    & :first-child { margin-top: 0; }
+    & :last-child { margin-bottom: 0; }
+  }
+}
+
+/* definition lists */
+dl {
+  clear: left;
+  --indent: 3ch;
+  /* --indent: attr(indent ch); not supported in any browser, but we can dream */
+  &.olPercent {
+    --indent: 5ch;
+    & > dt {
+      min-width: calc(var(--indent) - 2ch);
+    }
+  }
+  &.olPercent > dt {
+    float: none;
+  }
+
+  dl > dd > & {
+    margin-top: 0.5em;
+    margin-bottom: 0;
+  }
+}
+dl:not(.dlNewline) > dt {
+  float: left;
+  margin-right: 2ch;
+  min-width: 8ch;
+}
+dl > dd {
+  margin-bottom: .8em;
+  margin-left: var(--indent) !important; /* stupid element overrides */
+  min-height: 2ex;
+}
+:is(dl.compact, .dlCompact) > dd {
+  margin-bottom: 0;
+  & > :is(:first-child, .break:first-child + *) {
+    margin-top: 0;
+  }
+  & > :is(:last-child) {
+    margin-bottom: 0;
+  }
+}
+:is(dd, span).break {
+  display: none;
+}
+
+/* links */
+a, a[href].selfRef:hover {
+  text-decoration: none;
+}
+a[href] {
+  color: var(--link-color);
+}
+a[href].selfRef, .iref + a[href].internal {
+  color: var(--text-color);
+}
+a[href]:hover {
+  text-decoration: underline;
+}
+a[href].selfRef:hover {
+  background-color: var(--highlight-color);
+}
+a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px var(--font-mono);
+}
+tt, code {
+  /* changing the font for inline elements leads to different ascender
+     and descender heights; as we want to retain baseline alignment,
+     remove leading to avoid altering the final height of lines
+     note: this fails if these blocks take an entire line,
+     a different solution would be great */
+  line-height: 0;
+}
+:is(h1, h2, h3, h4, h5, h6) :is(tt, code) {
+  font-size: 84%;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+  padding: 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+  caption-side: bottom;
+}
+@media screen {
+  /* Auto-collapse boilerplate. */
+  :is(#status-of-memo, #copyright) p {
+    margin: -2px 0;
+    max-height: 0;
+    transition: max-height 2s ease, margin 0.5s ease 0.5s;
+    overflow: hidden;
+  }
+  :is(#status-of-memo, #copyright):hover p,
+  :is(#status-of-memo, #copyright) h2:target ~ p {
+    margin: 0.5em 0;
+    max-height: 500px;
+    overflow: auto;
+  }
+  pre, svg {
+    display: inline-block;
+    /* In the horizontal direction, sometimes people make over-sized figures.
+       Scrollbars for those is therefore necessary: auto adds them as necessary..
+       In the vertical direction, the line-height can combine with the font
+       asender/descender height to produce scrollbars: hidden avoids that. */
+    overflow: auto hidden;
+  }
+  pre {
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  svg {
+    max-width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  :is(pre, svg) + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  margin: 1em 0;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: auto;
+  max-width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+}
+table.right {
+  margin-left: auto;
+}
+table.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+table.left {
+  margin-right: auto;
+}
+table .text-left {
+  text-align: left;
+}
+table .text-center {
+  text-align: center;
+}
+table .text-right {
+  text-align: right;
+}
+
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  background-color: var(--line-color);
+}
+:is(tr:nth-child(2n), thead+tbody > tr:nth-child(2n+1)) > td {
+  background-color: var(--background-color);
+}
+:is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
+  background-color: var(--highlight-color);
+}
+table caption {
+  margin: 0;
+  padding: 3px 0 3px 1em;
+}
+table p {
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  opacity: 0.2;
+  user-select: none;
+  &[href] {
+    color: var(--pilcrow-weak);
+    &:hover { text-decoration: none; }
+  }
+}
+@media not print {
+  :hover > a.pilcrow {
+    opacity: 1;
+  }
+  a.pilcrow[href]:hover {
+    color: var(--pilcrow-strong);
+    background-color: transparent;
+  }
+}
+@media print {
+  a.pilcrow {
+    display: none;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: var(--small-font-size);
+}
+.role {
+  font-variant: all-small-caps;
+}
+sub, sup {
+  line-height: 1;
+  font-size: 80%;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 15ch;
+  & dt {
+    width: var(--identifier-width);
+    min-width: var(--identifier-width);
+    clear: left;
+    float: left;
+    text-align: right;
+    margin-right: 1ch;
+  }
+  & dd {
+    margin: 0;
+    margin-left: calc(1em + var(--identifier-width)) !important;
+    min-width: 5em;
+  }
+  & .authors {
+    & .author {
+      display: inline-block;
+      margin-right: 1.5em;
+    }
+    & .org {
+      font-style: italic;
+    }
+  }
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+
+  & nav {
+    & ul {
+      margin: 0 0.5em 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    & li {
+      line-height: 1.3em;
+      margin: 2px 0;
+      padding-left: 1.2em;
+      text-indent: -1.2em;
+    }
+  }
+  & a.xref {
+    white-space: normal;
+  }
+}
+
+.references {
+  & > dt {
+    text-align: right;
+    font-weight: bold;
+    min-width: 10ch;
+    margin-right: 1.5ch;
+    &:target::before {
+      content: "⇒";
+      margin: 0 10px 0 -25px;
+    }
+  }
+  & > dd {
+    margin-left: 12ch !important;
+    overflow: visible;
+    & .refInstance {
+      margin-bottom: 0.8em;
+    }
+    & .ascii {
+      margin-bottom: 0.25em;
+    }
+  }
+}
+
+#rfc\.index\.index + ul {
+  margin-left: 0;
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  max-width: 20em;
+  margin: 1em auto 1em 0;
+
+  & .nameRole {
+    font-weight: 700;
+    margin-left: 0;
+  }
+  & .label {
+    margin: 0.5em 0;
+  }
+  & .type {
+    display: none;
+  }
+  & .alternative-contact {
+    margin: 0.5em 0 0.25em 0;
+  }
+  & .non-ascii {
+    margin: 0 0 0 2em;
+  }
+  & div.left {
+    text-align: left;
+  }
+  & div.right {
+    text-align: right;
+  }
+}
+
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses > section {
+    column-count: 2;
+    column-gap: 20px;
+  }
+  #authors-addresses > section > h2 {
+    column-span: all;
+  }
+  /* hack for break-inside: avoid-column */
+  #authors-addresses address {
+    display: inline-block;
+    break-inside: avoid-column;
+  }
+}
+
+/* Comments */
+.rfcEditorRemove p:first-of-type {
+  font-style: italic;
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+
+@media screen {
+  #toc nav {
+    font-family: var(--font-title);
+    font-weight: 360;
+    & > ul { margin-bottom: 2em; }
+    & ul {
+      margin: 0 0 0 4px;
+      & :is(p, li) {
+        margin: 2px 0;
+      }
+    }
+  }
+  #toc a.toplink {
+    float: right;
+  }
+}
+@media not screen {
+  #toc a.toplink {
+    display: none;
+  }
+}
+
+
+/* TOC layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 1px 0 0 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 2px 0 2px 6px;
+    padding-right: 1em;
+    font-size: 18px;
+    line-height: 24px;
+    min-width: 190px;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+    &::before { /* css hamburger */
+      float: right;
+      position: relative;
+      width: 1em;
+      height: 1px;
+      left: -164px;
+      margin: 8px 0 0 0;
+      background: white none repeat scroll 0 0;
+      box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+      content: "";
+    }
+  }
+  #toc nav {
+    display: none;
+    background-color: var(--background-color);
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+  #toc.active {
+    opacity: 1;
+    & nav { display: block; }
+  }
+  /* Make the collapsed ToC header render white on gray also when it's a link */
+  #toc h2 a,
+  #toc h2 a:is(:link, :focus, :hover),
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+  #toc a.toplink {
+    margin: 2px 0.5em 0;
+  }
+}
+
+/* TOC layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 2em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+  #toc a.toplink {
+    margin: 8px 0.5em 0;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre, .vcard {
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  :is(h2, h3, h4, h5, h6)+*, dd {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Dark mode. */
+@media (prefers-color-scheme: dark) {
+:root {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
+}
+
+/* SVG Trick: a prefix match works because only black and white are allowed */
+svg :is([stroke="black"], [stroke^="#000"]) {
+  stroke: var(--text-color);
+}
+svg :is([stroke="white"], [stroke^="#fff"]) {
+  stroke: var(--background-color);
+}
+svg :is([fill="black"], [fill^="#000"], :not([fill])) {
+  fill: var(--text-color);
+}
+svg :is([fill="white"], [fill^="#fff"]) {
+  fill: var(--background-color);
+}
+</style>
+
+</head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">moq-shareplay</td>
+<td class="right">February 2025</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Pehlivanoglu, et al.</td>
+<td class="center">Expires 22 August 2025</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">MOQ</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-pehlivanoglu-moq-shareplay-latest</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2025-02-18" class="published">18 February 2025</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Informational</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2025-08-22">22 August 2025</time></dd>
+<dt class="label-authors">Authors:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">A. Pehlivanoglu</div>
+<div class="org">Ozyegin University</div>
+</div>
+<div class="author">
+      <div class="author-name">K. Bekmez</div>
+<div class="org">Ozyegin University</div>
+</div>
+<div class="author">
+      <div class="author-name">B. Yumakogullari</div>
+<div class="org">Ozyegin University</div>
+</div>
+<div class="author">
+      <div class="author-name">Z. Gurel</div>
+<div class="org">Ozyegin University</div>
+</div>
+<div class="author">
+      <div class="author-name">A. Begen</div>
+<div class="org">Ozyegin University</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">Synchronized Video-on-Demand (VoD) Viewing with Media over QUIC Transport</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">This draft presents an approach for synchronized video-on-demand (VoD) viewing with Media over QUIC Transport (MOQT). It extends the current MOQT protocol to enable synchronized VoD functionality. This approach adapts MOQ’s push-content architecture to include interactive features such as pause, resume and seek.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 22 August 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2025 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.1">
+                <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="#section-1.1" class="auto internal xref">1.1</a>.  <a href="#name-terms-and-definitions" class="internal xref">Terms and Definitions</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.2">
+                <p id="section-toc.1-1.1.2.2.1" class="keepWithNext"><a href="#section-1.2" class="auto internal xref">1.2</a>.  <a href="#name-notational-conventions" class="internal xref">Notational Conventions</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-synchronized-playback-contr" class="internal xref">Synchronized Playback Control</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.1">
+                <p id="section-toc.1-1.2.2.1.1"><a href="#section-2.1" class="auto internal xref">2.1</a>.  <a href="#name-playback-control-mechanisms" class="internal xref">Playback Control Mechanisms</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.1.2.1">
+                    <p id="section-toc.1-1.2.2.1.2.1.1"><a href="#section-2.1.1" class="auto internal xref">2.1.1</a>.  <a href="#name-decoupling-seek-from-play-p" class="internal xref">Decoupling Seek from Play/Pause</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2">
+                <p id="section-toc.1-1.2.2.2.1"><a href="#section-2.2" class="auto internal xref">2.2</a>.  <a href="#name-sync-track-messages" class="internal xref">Sync-Track Messages</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2.2.1">
+                    <p id="section-toc.1-1.2.2.2.2.1.1"><a href="#section-2.2.1" class="auto internal xref">2.2.1</a>.  <a href="#name-play" class="internal xref">PLAY</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2.2.2">
+                    <p id="section-toc.1-1.2.2.2.2.2.1"><a href="#section-2.2.2" class="auto internal xref">2.2.2</a>.  <a href="#name-pause" class="internal xref">PAUSE</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2.2.3">
+                    <p id="section-toc.1-1.2.2.2.2.3.1"><a href="#section-2.2.3" class="auto internal xref">2.2.3</a>.  <a href="#name-seek" class="internal xref">SEEK</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2.2.4">
+                    <p id="section-toc.1-1.2.2.2.2.4.1"><a href="#section-2.2.4" class="auto internal xref">2.2.4</a>.  <a href="#name-status" class="internal xref">STATUS</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.3">
+                <p id="section-toc.1-1.2.2.3.1"><a href="#section-2.3" class="auto internal xref">2.3</a>.  <a href="#name-timestamp-for-playback-sync" class="internal xref">Timestamp for Playback Synchronization</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.4">
+                <p id="section-toc.1-1.2.2.4.1"><a href="#section-2.4" class="auto internal xref">2.4</a>.  <a href="#name-grouping-of-playback-contro" class="internal xref">Grouping of Playback Control Messages</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.5">
+                <p id="section-toc.1-1.2.2.5.1"><a href="#section-2.5" class="auto internal xref">2.5</a>.  <a href="#name-playback-status" class="internal xref">Playback Status</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.6">
+                <p id="section-toc.1-1.2.2.6.1"><a href="#section-2.6" class="auto internal xref">2.6</a>.  <a href="#name-playback-message-flow" class="internal xref">Playback Message Flow</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.6.2.1">
+                    <p id="section-toc.1-1.2.2.6.2.1.1"><a href="#section-2.6.1" class="auto internal xref">2.6.1</a>.  <a href="#name-message-semantics" class="internal xref">Message Semantics</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-leader-follower-client-mode" class="internal xref">Leader-Follower Client Model</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
+                <p id="section-toc.1-1.3.2.1.1"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-role-assignment" class="internal xref">Role Assignment</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
+                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-playback-control" class="internal xref">Playback Control</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-heartbeat-based-session-man" class="internal xref">Heartbeat-Based Session Management and Advanced Synchronization</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1">
+                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="auto internal xref">4.1</a>.  <a href="#name-heartbeat-messages" class="internal xref">Heartbeat Messages</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1.2.1">
+                    <p id="section-toc.1-1.4.2.1.2.1.1"><a href="#section-4.1.1" class="auto internal xref">4.1.1</a>.  <a href="#name-new-client-announcement" class="internal xref">New Client Announcement</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1.2.2">
+                    <p id="section-toc.1-1.4.2.1.2.2.1"><a href="#section-4.1.2" class="auto internal xref">4.1.2</a>.  <a href="#name-heartbeat-timeouts-and-disc" class="internal xref">Heartbeat Timeouts and Disconnections</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2">
+                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="auto internal xref">4.2</a>.  <a href="#name-out-of-sync-and-re-syncing" class="internal xref">Out of Sync and Re-Syncing</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3">
+                <p id="section-toc.1-1.4.2.3.1"><a href="#section-4.3" class="auto internal xref">4.3</a>.  <a href="#name-handling-network-issues-and" class="internal xref">Handling Network Issues and Group Policy</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.4">
+                <p id="section-toc.1-1.4.2.4.1"><a href="#section-4.4" class="auto internal xref">4.4</a>.  <a href="#name-fetch-based-architecture" class="internal xref">Fetch-Based Architecture</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1">
+                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="auto internal xref">7.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2">
+                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="auto internal xref">7.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-example-publisher-model" class="internal xref">Example Publisher Model</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1">
+                <p id="section-toc.1-1.8.2.1.1"><a href="#appendix-A.1" class="auto internal xref">A.1</a>.  <a href="#name-media-preparation" class="internal xref">Media Preparation</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.2">
+                <p id="section-toc.1-1.8.2.2.1"><a href="#appendix-A.2" class="auto internal xref">A.2</a>.  <a href="#name-publisher-moq-pub-responsib" class="internal xref">Publisher (<code>moq-pub</code>) Responsibilities</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.3">
+                <p id="section-toc.1-1.8.2.3.1"><a href="#appendix-A.3" class="auto internal xref">A.3</a>.  <a href="#name-streaming-mechanism" class="internal xref">Streaming Mechanism</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.3.2.1">
+                    <p id="section-toc.1-1.8.2.3.2.1.1"><a href="#appendix-A.3.1" class="auto internal xref">A.3.1</a>.  <a href="#name-session-initialization" class="internal xref">Session Initialization</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.4">
+                <p id="section-toc.1-1.8.2.4.1"><a href="#appendix-A.4" class="auto internal xref">A.4</a>.  <a href="#name-dynamic-playback-control" class="internal xref">Dynamic Playback Control</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.4.2.1">
+                    <p id="section-toc.1-1.8.2.4.2.1.1"><a href="#appendix-A.4.1" class="auto internal xref">A.4.1</a>.  <a href="#name-command-processing" class="internal xref">Command Processing</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">Media over QUIC Transport (MOQT) is a novel protocol designed for efficient media streaming over the QUIC transport protocol (<span>[<a href="#RFC9000" class="cite xref">RFC9000</a>]</span>). While MOQT has shown promise for live-edge streaming, its current design lacks support for essential VoD functionalities, such as pause, resume and seek, leaving gaps in its applicability for interactive media consumption. This document extends MOQT to enable synchronized VoD playback, introducing mechanisms that allow users to have more control over the media playback.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">This document outlines the architectural design, control mechanisms and synchronization logic implemented to achieve these objectives. This document's innovations include new MOQT tracks for synchronization control, an example media publisher model for serving on-demand video and a Leader-Follower model to demonstrate the potential of MOQT for enhancing synchronized VoD consumption.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<div id="terms-and-definitions">
+<section id="section-1.1">
+        <h3 id="name-terms-and-definitions">
+<a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-terms-and-definitions" class="section-name selfRef">Terms and Definitions</a>
+        </h3>
+<p id="section-1.1-1">The key words "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>", "<span class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL NOT</span>", "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>", "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
+"<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
+described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
+appear in all capitals, as shown here.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-1.1-2">
+          <dt id="section-1.1-2.1">Client:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.2">
+            <p id="section-1.1-2.2.1">The party initiating a Transport Session.<a href="#section-1.1-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.1-2.3">Server:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.4">
+            <p id="section-1.1-2.4.1">The party accepting an incoming Transport Session.<a href="#section-1.1-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.1-2.5">Endpoint:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.6">
+            <p id="section-1.1-2.6.1">A Client or Server.<a href="#section-1.1-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.1-2.7">Publisher:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.8">
+            <p id="section-1.1-2.8.1">An endpoint that handles subscriptions by sending
+    requested Objects from the requested track.<a href="#section-1.1-2.8.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.1-2.9">Subscriber:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.10">
+            <p id="section-1.1-2.10.1">An endpoint that subscribes to and receives tracks.<a href="#section-1.1-2.10.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.1-2.11">Original Publisher:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.12">
+            <p id="section-1.1-2.12.1">The initial publisher of a given track.<a href="#section-1.1-2.12.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.1-2.13">Relay:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.14">
+            <p id="section-1.1-2.14.1">An entity that is both a Publisher and a Subscriber, but not
+    the Original Publisher or End Subscriber.<a href="#section-1.1-2.14.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.1-2.15">Group:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.16">
+            <p id="section-1.1-2.16.1">A temporal sequence of objects.  A group represents a join
+    point in a track.  See (<span>[<a href="#MoQTransport" class="cite xref">MoQTransport</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-08#section-2.3" class="relref">Section 2.3</a></span>).<a href="#section-1.1-2.16.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.1-2.17">Object:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.18">
+            <p id="section-1.1-2.18.1">An object is an addressable unit whose payload is a sequence
+    of bytes.  Objects form the base element in the MOQT data model.
+    See (<span>[<a href="#MoQTransport" class="cite xref">MoQTransport</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-08#section-2.1" class="relref">Section 2.1</a></span>).<a href="#section-1.1-2.18.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.1-2.19">Track:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.20">
+            <p id="section-1.1-2.20.1">An encoded bitstream.  Tracks contain a sequential series of
+    one or more groups and are the subscribable entity with MOQT. See (<span>[<a href="#MoQTransport" class="cite xref">MoQTransport</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-08#section-2.4" class="relref">Section 2.4</a></span>).<a href="#section-1.1-2.20.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.1-2.21">Sync-Track:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.22">
+            <p id="section-1.1-2.22.1">A dedicated track used to synchronize playback across multiple clients by transmitting PLAY, PAUSE and SEEK commands.<a href="#section-1.1-2.22.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.1-2.23">Leader Client:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.24">
+            <p id="section-1.1-2.24.1">The designated control authority within a synchronized playback session. The Leader client issues playback control messages (<span>[<a href="#MoQTransport" class="cite xref">MoQTransport</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-08#section-7" class="relref">Section 7</a></span>) that all subscribers must follow.<a href="#section-1.1-2.24.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.1-2.25">Follower Client:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.26">
+            <p id="section-1.1-2.26.1">A subscriber that follows playback instructions from the Leader client to maintain synchronization.<a href="#section-1.1-2.26.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.1-2.27">Video-on-Demand (VoD) Session:</dt>
+          <dd style="margin-left: 1.5em" id="section-1.1-2.28">
+            <p id="section-1.1-2.28.1">A session where pre-recorded media is streamed with user-controlled playback features.<a href="#section-1.1-2.28.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="notational-conventions">
+<section id="section-1.2">
+        <h3 id="name-notational-conventions">
+<a href="#section-1.2" class="section-number selfRef">1.2. </a><a href="#name-notational-conventions" class="section-name selfRef">Notational Conventions</a>
+        </h3>
+<p id="section-1.2-1">This document uses the conventions detailed in (<span>[<a href="#RFC9000" class="cite xref">RFC9000</a>], <a href="https://rfc-editor.org/rfc/rfc9000#section-1.3" class="relref">Section 1.3</a></span>)
+when describing the binary encoding.<a href="#section-1.2-1" class="pilcrow">¶</a></p>
+<p id="section-1.2-2">As a quick reference, the following list provides a non-normative summary
+of the parts of RFC9000 field syntax that are used in this specification.<a href="#section-1.2-2" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-1.2-3">
+          <dt id="section-1.2-3.1">x (..):</dt>
+          <dd style="margin-left: 1.5em" id="section-1.2-3.2">
+            <p id="section-1.2-3.2.1">Indicates that x can be any length, including zero bits.  Values
+ in this format always end on a byte boundary.<a href="#section-1.2-3.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.2-3.3">x (i):</dt>
+          <dd style="margin-left: 1.5em" id="section-1.2-3.4">
+            <p id="section-1.2-3.4.1">Indicates that x holds an integer value using the variable-length
+encoding as described in (<span>[<a href="#RFC9000" class="cite xref">RFC9000</a>], <a href="https://rfc-editor.org/rfc/rfc9000#section-16" class="relref">Section 16</a></span>).<a href="#section-1.2-3.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</div>
+</section>
+</div>
+<div id="synchronized-playback-control">
+<section id="section-2">
+      <h2 id="name-synchronized-playback-contr">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-synchronized-playback-contr" class="section-name selfRef">Synchronized Playback Control</a>
+      </h2>
+<p id="section-2-1">The MOQT protocol does not explicitly define dedicated control messages for PLAY, PAUSE or SEEK operations. Instead, these functionalities are achieved through subscription-based messaging.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<div id="playback-control-mechanisms">
+<section id="section-2.1">
+        <h3 id="name-playback-control-mechanisms">
+<a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-playback-control-mechanisms" class="section-name selfRef">Playback Control Mechanisms</a>
+        </h3>
+<p id="section-2.1-1">Playback is initiated by sending a SUBSCRIBE (<span>[<a href="#MoQTransport" class="cite xref">MoQTransport</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-08#section-7.4" class="relref">Section 7.4</a></span>) control message for the desired media track. The SUBSCRIBE message specifies the track namespace, track name and a filter type (e.g., Latest Group or Absolute Start) to determine the starting point of the media delivery. Pausing playback is accomplished by sending a specific PAUSE message with its corresponding Group ID via Sync-Track. This stops the original publisher from sending further objects for the specified track. To resume playback, the client issues a PLAY message again via Sync-Track. In the case of staying inactive for an extended period of time, the client will be unsubscribed automatically via MOQT's UNSUBSCRIBE (<span>[<a href="#MoQTransport" class="cite xref">MoQTransport</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-08#section-7.6" class="relref">Section 7.6</a></span>). To start the playback again, the client sends a SUBSCRIBE message.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
+<p id="section-2.1-2">Seeking to a specific position within a track is supported using the SEEK message via Sync-Track, with the corresponding Group ID. This allows the client to request media starting from a specific group and continuing in a push-content fashion. However, this functionality requires that the original publisher supports the ability to serve media from arbitrary positions within the track, which may not be universally available in all implementations. This is discussed in Section 4 in detail.<a href="#section-2.1-2" class="pilcrow">¶</a></p>
+<p id="section-2.1-3">This document introduces new Sync-Track messages, which can only be sent by the Leader client. When the Leader client sends these messages, a compatible publisher will respond by playing, pausing or seeking as instructed. Upon receiving a PAUSE command, the original publisher halts broadcasting at the specified Group ID, freezing playback until a PLAY command resumes it from the paused position. A SEEK command directs the original publisher to calculate the frame corresponding to the provided Group ID and restart broadcasting from that frame. This mechanism ensures all subscribers remain synchronized, allowing them to watch the stream simultaneously from the adjusted playback point.<a href="#section-2.1-3" class="pilcrow">¶</a></p>
+<div id="decoupling-seek-from-playpause">
+<section id="section-2.1.1">
+          <h4 id="name-decoupling-seek-from-play-p">
+<a href="#section-2.1.1" class="section-number selfRef">2.1.1. </a><a href="#name-decoupling-seek-from-play-p" class="section-name selfRef">Decoupling Seek from Play/Pause</a>
+          </h4>
+<p id="section-2.1.1-1">The SEEK operation functions independently of PLAY and PAUSE commands. A client can issue a SEEK command regardless of the current playback state. This means a client may seek to a different position while paused and later resume playback from the new position. Likewise, if a client is currently playing, a SEEK command will override the current playback position without requiring a PAUSE beforehand.<a href="#section-2.1.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="sync-track-messages">
+<section id="section-2.2">
+        <h3 id="name-sync-track-messages">
+<a href="#section-2.2" class="section-number selfRef">2.2. </a><a href="#name-sync-track-messages" class="section-name selfRef">Sync-Track Messages</a>
+        </h3>
+<p id="section-2.2-1">Every single message on the Sync-Track is a MOQT object, which is transmitted using the MOQT streaming architecture. These messages encapsulate playback control commands (PLAY, PAUSE, SEEK) within MOQT objects, ensuring they are processed and relayed consistently across the session. The Sync-Track operates as a track within the MOQT session, where control messages are formatted as follows:<a href="#section-2.2-1" class="pilcrow">¶</a></p>
+<span id="name-overall-sync-track-message-"></span><div id="shareplay-moq-message-format">
+<figure id="figure-1">
+          <div class="alignLeft art-text artwork" id="section-2.2-2.1">
+<pre>
+Sync-Track Message {
+  Message Type (i),
+  Message Length (i),
+  Message Payload (..),
+}
+</pre>
+</div>
+<figcaption><a href="#figure-1" class="selfRef">Figure 1</a>:
+<a href="#name-overall-sync-track-message-" class="selfRef">Overall Sync-Track message format</a>
+          </figcaption></figure>
+</div>
+<p id="section-2.2-3">Each message type (PLAY, PAUSE, SEEK) is identified by its unique Message Type ID and follows a structured format to ensure integration with the MOQT transport mechanisms. These messages are reliably delivered, maintaining synchronization among all session participants. Since the Sync-Track messages are standard MOQT objects, they leverage the existing MOQT stream handling mechanisms.<a href="#section-2.2-3" class="pilcrow">¶</a></p>
+<table class="center" id="table-1">
+          <caption><a href="#table-1" class="selfRef">Table 1</a></caption>
+<thead>
+            <tr>
+              <th class="text-right" rowspan="1" colspan="1">ID</th>
+              <th class="text-left" rowspan="1" colspan="1">Messages</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-right" rowspan="1" colspan="1">0x1</td>
+              <td class="text-left" rowspan="1" colspan="1">PLAY (<a href="#message-play" class="auto internal xref">Section 2.2.1</a>)</td>
+            </tr>
+            <tr>
+              <td class="text-right" rowspan="1" colspan="1">0x2</td>
+              <td class="text-left" rowspan="1" colspan="1">PAUSE (<a href="#message-pause" class="auto internal xref">Section 2.2.2</a>)</td>
+            </tr>
+            <tr>
+              <td class="text-right" rowspan="1" colspan="1">0x3</td>
+              <td class="text-left" rowspan="1" colspan="1">SEEK (<a href="#message-seek" class="auto internal xref">Section 2.2.3</a>)</td>
+            </tr>
+            <tr>
+              <td class="text-right" rowspan="1" colspan="1">0x4</td>
+              <td class="text-left" rowspan="1" colspan="1">STATUS (<a href="#message-status" class="auto internal xref">Section 2.2.4</a>)</td>
+            </tr>
+          </tbody>
+        </table>
+<div id="message-play">
+<section id="section-2.2.1">
+          <h4 id="name-play">
+<a href="#section-2.2.1" class="section-number selfRef">2.2.1. </a><a href="#name-play" class="section-name selfRef">PLAY</a>
+          </h4>
+<span id="name-sync-track-play-message"></span><div id="shareplay-moq-play-format">
+<figure id="figure-2">
+            <div class="alignLeft art-text artwork" id="section-2.2.1-1.1">
+<pre>
+PLAY Message {
+  Type (i) = 0x1,
+  Length (i),
+  Timestamp (i),
+}
+</pre>
+</div>
+<figcaption><a href="#figure-2" class="selfRef">Figure 2</a>:
+<a href="#name-sync-track-play-message" class="selfRef">Sync-Track PLAY message</a>
+            </figcaption></figure>
+</div>
+</section>
+</div>
+<div id="message-pause">
+<section id="section-2.2.2">
+          <h4 id="name-pause">
+<a href="#section-2.2.2" class="section-number selfRef">2.2.2. </a><a href="#name-pause" class="section-name selfRef">PAUSE</a>
+          </h4>
+<span id="name-sync-track-pause-message"></span><div id="shareplay-moq-pause-format">
+<figure id="figure-3">
+            <div class="alignLeft art-text artwork" id="section-2.2.2-1.1">
+<pre>
+PAUSE Message {
+  Type (i) = 0x2,
+  Length (i),
+  Timestamp (i),
+  Group ID (i),
+}
+</pre>
+</div>
+<figcaption><a href="#figure-3" class="selfRef">Figure 3</a>:
+<a href="#name-sync-track-pause-message" class="selfRef">Sync-Track PAUSE message</a>
+            </figcaption></figure>
+</div>
+</section>
+</div>
+<div id="message-seek">
+<section id="section-2.2.3">
+          <h4 id="name-seek">
+<a href="#section-2.2.3" class="section-number selfRef">2.2.3. </a><a href="#name-seek" class="section-name selfRef">SEEK</a>
+          </h4>
+<span id="name-sync-track-seek-message"></span><div id="shareplay-moq-seek-format">
+<figure id="figure-4">
+            <div class="alignLeft art-text artwork" id="section-2.2.3-1.1">
+<pre>
+SEEK Message {
+  Type (i) = 0x3,
+  Length (i),
+  Timestamp (i),
+  Group ID (i),
+}
+</pre>
+</div>
+<figcaption><a href="#figure-4" class="selfRef">Figure 4</a>:
+<a href="#name-sync-track-seek-message" class="selfRef">Sync-Track SEEK message</a>
+            </figcaption></figure>
+</div>
+</section>
+</div>
+<div id="message-status">
+<section id="section-2.2.4">
+          <h4 id="name-status">
+<a href="#section-2.2.4" class="section-number selfRef">2.2.4. </a><a href="#name-status" class="section-name selfRef">STATUS</a>
+          </h4>
+<p id="section-2.2.4-1">The Playing state is represented by 1, the Paused state is represented by 0 in the PlaybackState parameter.<a href="#section-2.2.4-1" class="pilcrow">¶</a></p>
+<span id="name-sync-track-status-message"></span><div id="shareplay-moq-status-format">
+<figure id="figure-5">
+            <div class="alignLeft art-text artwork" id="section-2.2.4-2.1">
+<pre>
+STATUS Message {
+  Type (i) = 0x4,
+  Length (i),
+  Timestamp (i),
+  Group ID (i),
+  PlaybackState (i),
+}
+</pre>
+</div>
+<figcaption><a href="#figure-5" class="selfRef">Figure 5</a>:
+<a href="#name-sync-track-status-message" class="selfRef">Sync-Track STATUS message</a>
+            </figcaption></figure>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="timestamp-for-playback-synchronization">
+<section id="section-2.3">
+        <h3 id="name-timestamp-for-playback-sync">
+<a href="#section-2.3" class="section-number selfRef">2.3. </a><a href="#name-timestamp-for-playback-sync" class="section-name selfRef">Timestamp for Playback Synchronization</a>
+        </h3>
+<p id="section-2.3-1">Each Sync-Track control message (PLAY, PAUSE, SEEK) contains a timestamp field, which represents the intended media position when the action is triggered. This timestamp ensures that playback actions (especially SEEK) are synchronized across clients, preventing head-of-line blocking due to out-of-order commands. The original publisher uses this timestamp to adjust the playback position accordingly.<a href="#section-2.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="grouping-of-playback-control-messages">
+<section id="section-2.4">
+        <h3 id="name-grouping-of-playback-contro">
+<a href="#section-2.4" class="section-number selfRef">2.4. </a><a href="#name-grouping-of-playback-contro" class="section-name selfRef">Grouping of Playback Control Messages</a>
+        </h3>
+<p id="section-2.4-1">The PLAY and PAUSE commands must be treated as dependent operations and thus belong to the same control subgroup. However, SEEK operates independently and belongs to a separate subgroup. This separation ensures that PLAY/PAUSE messages are processed sequentially within their stream, while the SEEK commands are handled in a separate stream to avoid blocking the playback state transitions.<a href="#section-2.4-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="playback-status">
+<section id="section-2.5">
+        <h3 id="name-playback-status">
+<a href="#section-2.5" class="section-number selfRef">2.5. </a><a href="#name-playback-status" class="section-name selfRef">Playback Status</a>
+        </h3>
+<p id="section-2.5-1">To achieve better synchronization, a new status reporting message is introduced. This stream carries periodic updates from the original publisher, indicating the current playback position, current PlaybackState (Playing/Paused), and last acknowledged seek position. Clients can subscribe to this stream to get notified of every playback state change.<a href="#section-2.5-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="playback-message-flow">
+<section id="section-2.6">
+        <h3 id="name-playback-message-flow">
+<a href="#section-2.6" class="section-number selfRef">2.6. </a><a href="#name-playback-message-flow" class="section-name selfRef">Playback Message Flow</a>
+        </h3>
+<p id="section-2.6-1">The following message flow illustrates how the playback operations (PLAY, PAUSE and SEEK) are used through the relay servers, thus enabling clients to stay in a synchronized playback.<a href="#section-2.6-1" class="pilcrow">¶</a></p>
+<span id="name-sync-track-message-flow-and"></span><div id="shareplay-moq-message-flow-example">
+<figure id="figure-6">
+          <div class="alignLeft art-text artwork" id="section-2.6-2.1">
+<pre>
+Leader Client             Relay Server(s)          Original Publisher   Follower Clients
+     |                          |                          |               |
+     |---------- PLAY ---------&gt;|                          |               |
+     |                          |---------- PLAY ---------&gt;|               |
+     |                          |&lt;----- Media Stream ------|               |
+     |&lt;----- Media Stream ------|-------------- Media Stream -------------&gt;|
+     |&lt;----- Media Stream ------|-------------- Media Stream -------------&gt;|
+     |&lt;----- Media Stream ------|-------------- Media Stream -------------&gt;|
+     |---- SEEK {Group 10} ----&gt;|                          |               |
+     |                          |---- SEEK {Group 10} ----&gt;|               |
+     |&lt;-- Media Obj from G10 ---|-----------  Media Obj from G10 ---------&gt;|
+     |&lt;----- Media Stream ------|-------------- Media Stream -------------&gt;|
+     |&lt;----- Media Stream ------|-------------- Media Stream -------------&gt;|
+     |---- PAUSE {Group 18} ---&gt;|                          |               |
+     |                          |---- PAUSE {Group 18} ---&gt;|               |
+     |                          |&lt;--- Stop Media At G18 ---|               |
+     |                          |                          |               |
+</pre>
+</div>
+<figcaption><a href="#figure-6" class="selfRef">Figure 6</a>:
+<a href="#name-sync-track-message-flow-and" class="selfRef">Sync-Track Message Flow and Playback Example Scenario</a>
+          </figcaption></figure>
+</div>
+<div id="message-semantics">
+<section id="section-2.6.1">
+          <h4 id="name-message-semantics">
+<a href="#section-2.6.1" class="section-number selfRef">2.6.1. </a><a href="#name-message-semantics" class="section-name selfRef">Message Semantics</a>
+          </h4>
+<p id="section-2.6.1-1">These messages <span class="bcp14">MUST</span> be sent exclusively by the Leader client (Client ID 0).
+Relay servers <span class="bcp14">MUST</span> discard such messages if received from non-Leader clients.<a href="#section-2.6.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="leader-follower-client-model">
+<section id="section-3">
+      <h2 id="name-leader-follower-client-mode">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-leader-follower-client-mode" class="section-name selfRef">Leader-Follower Client Model</a>
+      </h2>
+<p id="section-3-1">The Leader-Follower client model is a subscriber coordination mechanism designed to enforce synchronized media playback across multiple clients. This model ensures deterministic control over playback operations to prevent conflicting actions and maintain synchronization.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<div id="role-assignment">
+<section id="section-3.1">
+        <h3 id="name-role-assignment">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-role-assignment" class="section-name selfRef">Role Assignment</a>
+        </h3>
+<p id="section-3.1-1">For simplicity, no Leader election algorithm is implemented in this model. The first subscriber to join a session is automatically designated as the Leader client (Client ID 0). Subsequent subscribers are assigned incremental Follower client IDs (e.g., 1, 2, ...) and inherit the playback state from the Leader. This ensures straightforward session initiation without requiring complex coordination mechanisms.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="playback-control">
+<section id="section-3.2">
+        <h3 id="name-playback-control">
+<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-playback-control" class="section-name selfRef">Playback Control</a>
+        </h3>
+<span class="break"></span><dl class="dlParallel" id="section-3.2-1">
+          <dt id="section-3.2-1.1">Exclusive Control:</dt>
+          <dd style="margin-left: 1.5em" id="section-3.2-1.2">
+            <p id="section-3.2-1.2.1">Only the Leader client may issue playback Sync-Track messages (PLAY, PAUSE, SEEK).<a href="#section-3.2-1.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-3.2-1.3"></dt>
+          <dd style="margin-left: 1.5em" id="section-3.2-1.4">
+            <p id="section-3.2-1.4.1">The Sync-Track message requests that are coming from the Follower clients will be forwarded to the Leader Client for review.<a href="#section-3.2-1.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-3.2-1.5">State Propagation:</dt>
+          <dd style="margin-left: 1.5em" id="section-3.2-1.6">
+            <p id="section-3.2-1.6.1">Control messages from the Leader client are distributed to all Follower clients via the relay servers, ensuring synchronized execution.<a href="#section-3.2-1.6.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-3.2-1.7">Leader Failure Handling:</dt>
+          <dd style="margin-left: 1.5em" id="section-3.2-1.8">
+            <p id="section-3.2-1.8.1">If the Leader Client disconnects or becomes unresponsive, the lowest-ID active Follower client assumes the Leader role. The new Leader client inherits Client ID 0, but the other Follower IDs do not change.<a href="#section-3.2-1.8.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</div>
+</section>
+</div>
+<div id="heartbeat-based-session-management-and-advanced-synchronization">
+<section id="section-4">
+      <h2 id="name-heartbeat-based-session-man">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-heartbeat-based-session-man" class="section-name selfRef">Heartbeat-Based Session Management and Advanced Synchronization</a>
+      </h2>
+<p id="section-4-1">While the Leader-Follower paradigm handles playback control, additional functionality is needed for:<a href="#section-4-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4-2">
+<li id="section-4-2.1">
+          <p id="section-4-2.1.1">Monitoring client synchronization and connectivity.<a href="#section-4-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-4-2.2">
+          <p id="section-4-2.2.1">Handling clients that wish to get out of synchronization or rejoin later.<a href="#section-4-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-4-2.3">
+          <p id="section-4-2.3.1">Making group-level decisions in the face of network issues.<a href="#section-4-2.3.1" class="pilcrow">¶</a></p>
+</li>
+      </ol>
+<p id="section-4-3">This section defines a “heartbeat” mechanism and outlines how clients can join, leave and optionally “fall behind” or “skip ahead”.<a href="#section-4-3" class="pilcrow">¶</a></p>
+<div id="heartbeat-messages">
+<section id="section-4.1">
+        <h3 id="name-heartbeat-messages">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-heartbeat-messages" class="section-name selfRef">Heartbeat Messages</a>
+        </h3>
+<p id="section-4.1-1">Every client (Leader or Follower) periodically sends a <strong>heartbeat</strong> message to the relay (or or the original publisher, depending on implementation). The relay aggregates these messages to maintain an up-to-date view of each client’s playback status and connectivity. A heartbeat message contains at least:<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.1-2">
+<li id="section-4.1-2.1">
+            <p id="section-4.1-2.1.1"><strong>Local Playback Time</strong>: The client’s current playback position (e.g., Group ID or time offset (PTS) in the video).<a href="#section-4.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.1-2.2">
+            <p id="section-4.1-2.2.1"><strong>Current Global Time</strong>: The client’s global timestamp, allowing the relay (and/or Leader) to account for the delay in message transmission.<a href="#section-4.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+<div id="new-client-announcement">
+<section id="section-4.1.1">
+          <h4 id="name-new-client-announcement">
+<a href="#section-4.1.1" class="section-number selfRef">4.1.1. </a><a href="#name-new-client-announcement" class="section-name selfRef">New Client Announcement</a>
+          </h4>
+<p id="section-4.1.1-1">When a new client joins the session, the <strong>first</strong> heartbeat message includes an additional “New-Client-Join” indicator. This allows the relay (and indirectly the Leader) to:<a href="#section-4.1.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.1.1-2.1">
+              <p id="section-4.1.1-2.1.1">Recognize a new participant in the session.<a href="#section-4.1.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.1.1-2.2">
+              <p id="section-4.1.1-2.2.1">Potentially notify other participants (if needed).<a href="#section-4.1.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+</section>
+</div>
+<div id="heartbeat-timeouts-and-disconnections">
+<section id="section-4.1.2">
+          <h4 id="name-heartbeat-timeouts-and-disc">
+<a href="#section-4.1.2" class="section-number selfRef">4.1.2. </a><a href="#name-heartbeat-timeouts-and-disc" class="section-name selfRef">Heartbeat Timeouts and Disconnections</a>
+          </h4>
+<p id="section-4.1.2-1">Each client is expected to send heartbeat messages within a pre-decided interval. If a heartbeat is not received for a duration exceeding that interval (plus some tolerance), the relay assumes the client has become inactive or disconnected. This triggers either:<a href="#section-4.1.2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.1.2-2.1">
+              <p id="section-4.1.2-2.1.1"><strong>Temporary Removal</strong>: The relay marks the client as “inactive” but does not remove them from the session state immediately.<a href="#section-4.1.2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.1.2-2.2">
+              <p id="section-4.1.2-2.2.1"><strong>Full Removal</strong>: If no further heartbeat arrives within a longer grace period, the client is marked as “disconnected” and removed from the synchronized group.<a href="#section-4.1.2-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+</section>
+</div>
+</section>
+</div>
+<div id="out-of-sync-and-re-syncing">
+<section id="section-4.2">
+        <h3 id="name-out-of-sync-and-re-syncing">
+<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-out-of-sync-and-re-syncing" class="section-name selfRef">Out of Sync and Re-Syncing</a>
+        </h3>
+<p id="section-4.2-1">A client may decide to pause or seek independently of the group or otherwise desynchronize its playback. For instance, a user might rewind to re-watch a scene without causing the entire group to follow. Such actions are handled as follows:<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.2-2">
+<li id="section-4.2-2.1">
+            <p id="section-4.2-2.1.1"><strong>Local-Only Rewind/Seek</strong>:<a href="#section-4.2-2.1.1" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.1.2">
+The client can apply a local override of its playback buffer. It continues to send heartbeats but indicates via a flag (e.g., “Out-of-Sync”) that it is not following the group.<a href="#section-4.2-2.1.2" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.2-2.2">
+            <p id="section-4.2-2.2.1"><strong>Resuming Sync</strong>:<a href="#section-4.2-2.2.1" class="pilcrow">¶</a></p>
+<p id="section-4.2-2.2.2">
+Once the client is ready to rejoin synchronized playback, it sends a heartbeat with a special “Re-Sync Request” flag or re-subscribes to the Sync-Track. The Leader (or relay) then supplies the necessary offset or group position so the client can jump to the current playback point and synchronize with others.<a href="#section-4.2-2.2.2" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+</section>
+</div>
+<div id="handling-network-issues-and-group-policy">
+<section id="section-4.3">
+        <h3 id="name-handling-network-issues-and">
+<a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-handling-network-issues-and" class="section-name selfRef">Handling Network Issues and Group Policy</a>
+        </h3>
+<p id="section-4.3-1">Clients experiencing connection issues (e.g., low bandwidth or high latency) can degrade the overall group experience if every other client must wait. To mitigate this:<a href="#section-4.3-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.3-2">
+<li id="section-4.3-2.1">
+            <p id="section-4.3-2.1.1"><strong>Adaptive Bitrate (ABR) at the Relay</strong>:<a href="#section-4.3-2.1.1" class="pilcrow">¶</a></p>
+<p id="section-4.3-2.1.2">
+The relay can detect from heartbeat messages that a client is consistently behind or losing packets. It may choose to deliver lower-resolution encodings to that specific client (if available) to help it catch up.<a href="#section-4.3-2.1.2" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.3-2.2">
+            <p id="section-4.3-2.2.1"><strong>Lobby Policy: Wait vs. Continue</strong>:<a href="#section-4.3-2.2.1" class="pilcrow">¶</a></p>
+<p id="section-4.3-2.2.2">
+An initial session-level policy can determine if the group is willing to wait for slow clients or not. If the policy is set to “continue,” the lagging client might partially skip forward (or remain unsynchronized) until network conditions improve. If the policy is set to “wait,” the group collectively applies additional buffering or pause states to allow the slow client to keep up.<a href="#section-4.3-2.2.2" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+</section>
+</div>
+<div id="fetch-based-architecture">
+<section id="section-4.4">
+        <h3 id="name-fetch-based-architecture">
+<a href="#section-4.4" class="section-number selfRef">4.4. </a><a href="#name-fetch-based-architecture" class="section-name selfRef">Fetch-Based Architecture</a>
+        </h3>
+<p id="section-4.4-1">The current design builds on MOQ’s push-based content delivery. The current revision introduces a more scalable, fetch-oriented mechanism for client synchronization. This approach will further refine:<a href="#section-4.4-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.4-2.1">
+            <p id="section-4.4-2.1.1">The structure of heartbeat/status messages.<a href="#section-4.4-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.4-2.2">
+            <p id="section-4.4-2.2.1">How the group membership is signaled and updated.<a href="#section-4.4-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.4-2.3">
+            <p id="section-4.4-2.3.1">Interaction between “push” and “fetch” paradigms for adaptive VoD synchronization.<a href="#section-4.4-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.4-2.4">
+            <p id="section-4.4-2.4.1">More effective use of relays for more scalable systems.<a href="#section-4.4-2.4.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+</section>
+</div>
+<div id="security">
+<section id="section-5">
+      <h2 id="name-security-considerations">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-5-1">TODO.<a href="#section-5-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="iana">
+<section id="section-6">
+      <h2 id="name-iana-considerations">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-6-1">TODO.<a href="#section-6-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="sec-combined-references">
+<section id="section-7">
+      <h2 id="name-references">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<div id="sec-normative-references">
+<section id="section-7.1">
+        <h3 id="name-normative-references">
+<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="MoQTransport">[MoQTransport]</dt>
+        <dd>
+<span class="refAuthor">Curley, L.</span>, <span class="refAuthor">Pugin, K.</span>, <span class="refAuthor">Nandakumar, S.</span>, <span class="refAuthor">Vasiliev, V.</span>, and <span class="refAuthor">I. Swett</span>, <span class="refTitle">"Media over QUIC Transport"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-moq-transport-08</span>, <time datetime="2025-02-12" class="refDate">12 February 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-08">https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-08</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8174">[RFC8174]</dt>
+      <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="sec-informative-references">
+<section id="section-7.2">
+        <h3 id="name-informative-references">
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="RFC9000">[RFC9000]</dt>
+      <dd>
+<span class="refAuthor">Iyengar, J., Ed.</span> and <span class="refAuthor">M. Thomson, Ed.</span>, <span class="refTitle">"QUIC: A UDP-Based Multiplexed and Secure Transport"</span>, <span class="seriesInfo">RFC 9000</span>, <span class="seriesInfo">DOI 10.17487/RFC9000</span>, <time datetime="2021-05" class="refDate">May 2021</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9000">https://www.rfc-editor.org/rfc/rfc9000</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+</section>
+</div>
+<div id="example-publisher-model">
+<section id="appendix-A">
+      <h2 id="name-example-publisher-model">
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-example-publisher-model" class="section-name selfRef">Example Publisher Model</a>
+      </h2>
+<p id="appendix-A-1">This section defines an example architecture for adapting MOQT to VoD use cases. The model enables efficient retrieval and streaming of archived fragmented MP4 (fMP4) content through a specialized publisher (<code>moq-pub</code>), while maintaining compatibility with live-edge workflows.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<div id="media-preparation">
+<section id="appendix-A.1">
+        <h3 id="name-media-preparation">
+<a href="#appendix-A.1" class="section-number selfRef">A.1. </a><a href="#name-media-preparation" class="section-name selfRef">Media Preparation</a>
+        </h3>
+<span class="break"></span><dl class="dlParallel" id="appendix-A.1-1">
+          <dt id="appendix-A.1-1.1">Encoding:</dt>
+          <dd style="margin-left: 1.5em" id="appendix-A.1-1.2">
+            <p id="appendix-A.1-1.2.1">Media is encoded in H.264 (AVC) format.<a href="#appendix-A.1-1.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="appendix-A.1-1.3">Containerization:</dt>
+          <dd style="margin-left: 1.5em" id="appendix-A.1-1.4">
+            <p id="appendix-A.1-1.4.1">Media is packaged in fragmented MP4 (fMP4) format, where content is divided into discrete "moof" (Movie Fragment) and "mdat" (Media Data) atom pairs.<a href="#appendix-A.1-1.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="appendix-A.1-1.5">Initialization Segments:</dt>
+          <dd style="margin-left: 1.5em" id="appendix-A.1-1.6">
+            <p id="appendix-A.1-1.6.1">The <code>ftyp</code> (File Type) and <code>moov</code> (Movie Metadata) atoms are prepended to the media file. These provide global metadata (e.g., codec information, track layouts) and are transmitted once per session.<a href="#appendix-A.1-1.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="publisher-moq-pub-responsibilities">
+<section id="appendix-A.2">
+        <h3 id="name-publisher-moq-pub-responsib">
+<a href="#appendix-A.2" class="section-number selfRef">A.2. </a><a href="#name-publisher-moq-pub-responsib" class="section-name selfRef">Publisher (<code>moq-pub</code>) Responsibilities</a>
+        </h3>
+<span class="break"></span><dl class="dlParallel" id="appendix-A.2-1">
+          <dt id="appendix-A.2-1.1">Storage Integration:</dt>
+          <dd style="margin-left: 1.5em" id="appendix-A.2-1.2">
+            <p id="appendix-A.2-1.2.1">Stream archived fMP4 content directly from original publisher's local storage, eliminating the need for real-time transcoding.<a href="#appendix-A.2-1.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="appendix-A.2-1.3">Efficient Retrieval of Media:</dt>
+          <dd style="margin-left: 1.5em" id="appendix-A.2-1.4">
+            <p id="appendix-A.2-1.4.1">Support arbitrary access to media fragments (moof+mdat pairs) for low-latency seek operations.<a href="#appendix-A.2-1.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<p id="appendix-A.2-2">Media Codec: <code>moq-pub</code> supports H.264 encapsulated in fMP4.<a href="#appendix-A.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="streaming-mechanism">
+<section id="appendix-A.3">
+        <h3 id="name-streaming-mechanism">
+<a href="#appendix-A.3" class="section-number selfRef">A.3. </a><a href="#name-streaming-mechanism" class="section-name selfRef">Streaming Mechanism</a>
+        </h3>
+<span class="break"></span><dl class="dlParallel" id="appendix-A.3-1">
+          <dt id="appendix-A.3-1.1">Atomic Units:</dt>
+          <dd style="margin-left: 1.5em" id="appendix-A.3-1.2">
+            <p id="appendix-A.3-1.2.1">Media is streamed as sequential "moof+mdat" atom pairs, each representing a MOQT <em>object</em>. The <code>moof</code> atom precedes its corresponding <code>mdat</code> atom to ensure decodability.<a href="#appendix-A.3-1.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="appendix-A.3-1.3">Group Mapping:</dt>
+          <dd style="margin-left: 1.5em" id="appendix-A.3-1.4">
+            <p id="appendix-A.3-1.4.1">Each moof+mdat pair corresponds to a frame in the H.264 stream. A group of frames form a Group of Pictures (GOP). A GOP begins with an intra-coded frame (I-frame), followed by predictively-encoded frames (P/B-frames).
+The <code>Group ID</code> parameter in MOQT aligns with the GOP index in H.264. This ensures that seeking to a specific <code>Group ID</code> starts playback from the I-frame at the beginning of the requested GOP, enabling correct decoder initialization.
+The original publisher maintains an internal index mapping <code>Group ID</code> to the byte offset of the corresponding GOP’s moof+mdat pair.<a href="#appendix-A.3-1.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<div id="session-initialization">
+<section id="appendix-A.3.1">
+          <h4 id="name-session-initialization">
+<a href="#appendix-A.3.1" class="section-number selfRef">A.3.1. </a><a href="#name-session-initialization" class="section-name selfRef">Session Initialization</a>
+          </h4>
+<span class="break"></span><dl class="dlParallel" id="appendix-A.3.1-1">
+            <dt id="appendix-A.3.1-1.1">At the start of a streaming session:</dt>
+            <dd style="margin-left: 1.5em" id="appendix-A.3.1-1.2">
+              <ol start="1" type="1" class="normal type-1" id="appendix-A.3.1-1.2.1">
+<li id="appendix-A.3.1-1.2.1.1">
+                  <p id="appendix-A.3.1-1.2.1.1.1">The original publisher transmits the <code>ftyp</code> and <code>moov</code> atoms as an initialization segment.<a href="#appendix-A.3.1-1.2.1.1.1" class="pilcrow">¶</a></p>
+</li>
+                <li id="appendix-A.3.1-1.2.1.2">
+                  <p id="appendix-A.3.1-1.2.1.2.1">Subsequent objects (moof+mdat pairs) are transmitted incrementally, adhering to the subscriber’s playback state.<a href="#appendix-A.3.1-1.2.1.2.1" class="pilcrow">¶</a></p>
+</li>
+              </ol>
+</dd>
+          <dd class="break"></dd>
+</dl>
+</section>
+</div>
+</section>
+</div>
+<div id="dynamic-playback-control">
+<section id="appendix-A.4">
+        <h3 id="name-dynamic-playback-control">
+<a href="#appendix-A.4" class="section-number selfRef">A.4. </a><a href="#name-dynamic-playback-control" class="section-name selfRef">Dynamic Playback Control</a>
+        </h3>
+<p id="appendix-A.4-1">The original publisher asynchronously monitors a dedicated <code>Sync-Track</code> for control messages (e.g., <code>PLAY</code>, <code>PAUSE</code>, <code>SEEK</code>) issued by the <em>Leader Client</em>.<a href="#appendix-A.4-1" class="pilcrow">¶</a></p>
+<div id="command-processing">
+<section id="appendix-A.4.1">
+          <h4 id="name-command-processing">
+<a href="#appendix-A.4.1" class="section-number selfRef">A.4.1. </a><a href="#name-command-processing" class="section-name selfRef">Command Processing</a>
+          </h4>
+<span class="break"></span><dl class="dlParallel" id="appendix-A.4.1-1">
+            <dt id="appendix-A.4.1-1.1">Seek Operations: On receiving a <code>SEEK</code> command:</dt>
+            <dd style="margin-left: 1.5em" id="appendix-A.4.1-1.2">
+              <ol start="1" type="1" class="normal type-1" id="appendix-A.4.1-1.2.1">
+<li id="appendix-A.4.1-1.2.1.1">
+                  <p id="appendix-A.4.1-1.2.1.1.1">The original publisher identifies the start of the nearest GOP boundary for the requested <code>Group ID</code>, and resumes publishing from the corresponding frame.<a href="#appendix-A.4.1-1.2.1.1.1" class="pilcrow">¶</a></p>
+</li>
+                <li id="appendix-A.4.1-1.2.1.2">
+                  <p id="appendix-A.4.1-1.2.1.2.1">Streaming resumes from the start of the GOP containing the target I-frame, ensuring all dependent P/B-frames are included for seamless decoding.<a href="#appendix-A.4.1-1.2.1.2.1" class="pilcrow">¶</a></p>
+</li>
+                <li id="appendix-A.4.1-1.2.1.3">
+                  <p id="appendix-A.4.1-1.2.1.3.1">Subscribers receive the full GOP sequence, eliminating decoder errors caused by missing reference frames.
+Pause/Resume:<a href="#appendix-A.4.1-1.2.1.3.1" class="pilcrow">¶</a></p>
+</li>
+              </ol>
+</dd>
+            <dd class="break"></dd>
+<dt id="appendix-A.4.1-1.3"></dt>
+            <dd style="margin-left: 1.5em" id="appendix-A.4.1-1.4">
+              <p id="appendix-A.4.1-1.4.1">A <code>PAUSE</code> command halts the transmission according to the Group ID specified in the PAUSE message, where the Group ID corresponds to the current group of the playback. A subsequent <code>PLAY</code> command resumes streaming from the next sequential object.<a href="#appendix-A.4.1-1.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+</dl>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-B">
+      <h2 id="name-authors-addresses">
+<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Ahmet Pehlivanoglu</span></div>
+<div dir="auto" class="left"><span class="org">Ozyegin University</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:ahmet.pehlivanoglu@ozu.edu.tr" class="email">ahmet.pehlivanoglu@ozu.edu.tr</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Kerem Bekmez</span></div>
+<div dir="auto" class="left"><span class="org">Ozyegin University</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:kerem.bekmez@ozu.edu.tr" class="email">kerem.bekmez@ozu.edu.tr</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Basar Yumakogullari</span></div>
+<div dir="auto" class="left"><span class="org">Ozyegin University</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:basar.yumakogullari@ozu.edu.tr" class="email">basar.yumakogullari@ozu.edu.tr</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Zafer Gurel</span></div>
+<div dir="auto" class="left"><span class="org">Ozyegin University</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:zafer.gurel@ozu.edu.tr" class="email">zafer.gurel@ozu.edu.tr</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Ali Begen</span></div>
+<div dir="auto" class="left"><span class="org">Ozyegin University</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:ali.begen@networked.media" class="email">ali.begen@networked.media</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
