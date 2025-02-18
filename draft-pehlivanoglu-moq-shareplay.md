@@ -63,7 +63,7 @@ This draft presents an approach for synchronized video-on-demand (VoD) viewing w
 
 # Introduction
 
-Media Over QUIC Transport (MOQT) is a novel protocol designed for efficient media streaming over the QUIC transport protocol ({{?RFC9000}}). While MOQT has shown promise for live-edge streaming, its current design lacks support for essential VoD functionalities, such as pause, resume and seek, leaving gaps in its applicability for interactive media consumption. This document extends MOQT to enable synchronized VoD playback, introducing mechanisms that allow users to have more control over the media playback.
+Media over QUIC Transport (MOQT) is a novel protocol designed for efficient media streaming over the QUIC transport protocol ({{?RFC9000}}). While MOQT has shown promise for live-edge streaming, its current design lacks support for essential VoD functionalities, such as pause, resume and seek, leaving gaps in its applicability for interactive media consumption. This document extends MOQT to enable synchronized VoD playback, introducing mechanisms that allow users to have more control over the media playback.
 
 This document outlines the architectural design, control mechanisms and synchronization logic implemented to achieve these objectives. This document's innovations include new MOQT tracks for synchronization control, an example media publisher model for serving on-demand video and a Leader-Follower model to demonstrate the potential of MOQT for enhancing synchronized VoD consumption.
 
@@ -130,7 +130,7 @@ x (i):
 
 # Synchronized Playback Control
 
-The MOQT protocol does not explicitly define dedicated control messages for play, pause or seek operations. Instead, these functionalities are achieved through subscription-based messaging.
+The MOQT protocol does not explicitly define dedicated control messages for PLAY, PAUSE or SEEK operations. Instead, these functionalities are achieved through subscription-based messaging.
 
 ## Playback Control Mechanisms
 
@@ -261,7 +261,7 @@ These messages MUST be sent exclusively by the Leader client (Client ID 0).
 Relay servers MUST discard such messages if received from non-Leader clients.
 
 # Leader-Follower Client Model
-The Leader-Follower client model is a subscriber coordination mechanism designed to enforce synchronized media playback across multiple clients. This model ensures deterministic control over playback operations (e.g., play, pause, seek) to prevent conflicting actions and maintain synchronization.
+The Leader-Follower client model is a subscriber coordination mechanism designed to enforce synchronized media playback across multiple clients. This model ensures deterministic control over playback operations to prevent conflicting actions and maintain synchronization.
 
 ## Role Assignment
 For simplicity, no Leader election algorithm is implemented in this model. The first subscriber to join a session is automatically designated as the Leader client (Client ID 0). Subsequent subscribers are assigned incremental Follower client IDs (e.g., 1, 2, ...) and inherit the playback state from the Leader. This ensures straightforward session initiation without requiring complex coordination mechanisms.
